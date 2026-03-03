@@ -1,5 +1,8 @@
 function App() {
-  return (<>Workout AI Planner</>)
+  return (
+    <div>
+      <h1 className="text-3xl font-semibold">Workout AI Planner</h1>
+    </div>)
 }
 
 export default App
