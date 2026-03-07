@@ -5,7 +5,7 @@ const Home = () => {
     const { user, isLoading } = useAuth();
 
     if (user && !isLoading) {
-        return <Navigate to='/profile' />
+        return <Navigate to='/profile' replace />
     }
 
     return (<>Home</>);

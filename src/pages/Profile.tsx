@@ -6,11 +6,11 @@ const Profile = () => {
     const plan = false;
 
     if (!user && !isLoading) {
-        return <Navigate to='/auth/sign-in' />;
+        return <Navigate to='/auth/sign-in' replace />;
     }
 
     if (!plan) {
-        return <Navigate to='/onboarding' />
+        return <Navigate to='/onboarding' replace />
     }
 
     return (<>Profile</>);
