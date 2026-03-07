@@ -4,6 +4,7 @@ import { AuthContext } from "./AuthContext";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [neonUser, setNeonUser] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     // Load Neon User
     useEffect(() => {
@@ -17,13 +18,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 }
             } catch (error) {
                 console.error(error)
+            } finally {
+                setIsLoading(false)
             }
         }
         loadUser();
     }, [])
 
     return (
-        <AuthContext.Provider value={{ user: neonUser }}>
+        <AuthContext.Provider value={{ user: neonUser, isLoading }}>
             {children}
         </AuthContext.Provider>
     )
