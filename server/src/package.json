@@ -1,0 +1,31 @@
+{
+  "name": "workout-ai-planner-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev:server": "tsx watch src/index.ts"
+  },
+  "keywords": [],
+  "author": "Arvin T. Buid",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.4.2",
+    "@prisma/client": "^7.4.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.3.5",
+    "@types/pg": "^8.18.0",
+    "prisma": "^6.19.2",
+    "tsx": "^4.21.0"
+  }
+}
