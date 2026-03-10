@@ -5,7 +5,7 @@ import { Select } from "../components/ui/Select";
 import { useState } from "react";
 import { Textarea } from "../components/ui/TextArea";
 import { Button } from "../components/ui/Button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import type { UserProfile } from "../types";
 
 const goalOptions = [
@@ -66,6 +66,8 @@ const Onboarding = () => {
         injuries: "",
         preferredSplit: "full_body",
     })
+    const [isGenerating, setIsGenerating] = useState(true);
+    const [error, setError] = useState("");
 
     if (!user) {
         return <RedirectToSignIn />
@@ -88,16 +90,22 @@ const Onboarding = () => {
             preferredSplit: formData.preferredSplit as UserProfile["preferredSplit"],
         }
 
-        saveProfile(profile);
+        try {
+            await saveProfile(profile);
+            setIsGenerating(true);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to save profile");
+        } finally {
+            setIsGenerating(false);
+        }
     }
 
     return (
         <SignedIn>
             <div className="min-h-screen pt-24 pb-12 px-6">
                 <div className="max-w-lg mx-auto">
-
                     {/* Questionnaire */}
-                    <Card variant="bordered">
+                    {!isGenerating ? (<Card variant="bordered">
                         <h1 className="text-2xl font-bold mb-2">Tell Us About Yourself</h1>
                         <p className="text-muted mb-6">Help us create a perfect plan for you.</p>
                         <form onSubmit={handleSubmitQuestionnaire} className="space-y-5">
@@ -161,7 +169,13 @@ const Onboarding = () => {
                                 </Button>
                             </div>
                         </form>
-                    </Card>
+                    </Card>) : (
+                        <Card variant="bordered" className="py-16 text-center">
+                            <Loader2 className="w-14 h-14 text-accent animate-spin mx-auto mb-4" />
+                            <h2 className="text-2xl font-bold mb-2">Generating your plan...</h2>
+                            <p className="text-muted">Our AI is building your personalized training program.</p>
+                        </Card>
+                    )}
                 </div>
             </div>
         </SignedIn>
