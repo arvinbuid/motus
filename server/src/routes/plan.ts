@@ -1,5 +1,6 @@
 import {Router, type Request, type Response} from "express";
 import {prisma} from "../lib/prisma.js";
+import {generateTrainingPlan} from "../lib/ai.js";
 
 const planRouter = Router();
 
@@ -30,7 +31,15 @@ planRouter.post("/generate", async (req: Request, res: Response) => {
 
     let planJson;
 
-    // TODO: LLM logic for generating plan
+    try {
+      planJson = await generateTrainingPlan(profile);
+    } catch (error) {
+      console.error("AI generation failed:", error);
+      return res.status(500).json({
+        error: "Failed to generate training plan. Please try again.",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
 
     const planText = JSON.stringify(planJson, null, 2);
 
