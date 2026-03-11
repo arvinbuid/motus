@@ -5,7 +5,7 @@ import {TrainingPlan, UserProfile} from "../../types/index.js";
 
 export const generatePlan = async (
   profile: UserProfile | Record<string, any>,
-): Promise<TrainingPlan> => {
+): Promise<Omit<TrainingPlan, "id" | "userId" | "version" | "createdAt">> => {
   // Normalize profile data
   const normalizedProfile: UserProfile = {
     goal: profile.goal || "bulk",
@@ -21,7 +21,7 @@ export const generatePlan = async (
 
   if (!apiKey) throw new Error("OPEN_ROUTER_KEY is not defined in environment variables");
 
-  // ref: https://openrouter.ai/docs/quickstart#using-the-openai-sdk
+  // Reference: https://openrouter.ai/docs/quickstart#using-the-openai-sdk
   const openai = new OpenAI({
     apiKey,
     baseURL: "https://openrouter.ai/api/v1",
@@ -35,8 +35,70 @@ export const generatePlan = async (
   const prompt = buildPrompt(normalizedProfile);
 
   // API call to openai
-  // TODO
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "nvidia/llama-nemotron-embed-vl-1b-v2:free",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an expert fitness trainer and program designer. You must respond with valid JSON only. Do not include any markdown, reasoning, or additional text.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.8,
+      response_format: {type: "json_object"},
+    });
+
+    const content = completion.choices[0].message.content;
+
+    if (!content) {
+      console.error("[AI] No content in response:", JSON.stringify(completion, null, 2));
+      throw new Error("No content in AI response");
+    }
+
+    const planData = JSON.parse(content);
+
+    return formatPlanResponse(planData, normalizedProfile);
+  } catch (error) {
+    console.error("[AI] Error generating training plan:", error);
+    throw error;
+  }
 };
+
+function formatPlanResponse(
+  aiResponse: any,
+  profile: UserProfile,
+): Omit<TrainingPlan, "id" | "userId" | "version" | "createdAt"> {
+  const plan: Omit<TrainingPlan, "id" | "userId" | "version" | "createdAt"> = {
+    overview: {
+      goal: aiResponse.overview?.goal || `Customized ${profile.goal} program`,
+      frequency: aiResponse.overview?.frequency || `${profile.days_per_week} days per week`,
+      split: aiResponse.overview?.split || profile.preferred_split,
+      notes: aiResponse.overview?.notes || "Follow the program consistently for best results.",
+    },
+    weeklySchedule: (aiResponse.weeklySchedule || []).map((day: any) => ({
+      day: day.day || "Day",
+      focus: day.focus || "Focus",
+      exercises: (day.excercises || []).map((ex: any) => ({
+        name: ex.name || "Exercise",
+        sets: ex.sets || 3,
+        reps: ex.reps || "8-12",
+        rest: ex.rest || "60-90 sec",
+        rpe: ex.rpe || 7,
+        notes: ex.notes,
+        alternatives: ex.alternatives,
+      })),
+    })),
+    progression:
+      aiResponse.progression ||
+      "Increase weight by 2.5-5lbs when you can complete all sets with good form. Track your progress weekly.",
+  };
+  return plan;
+}
 
 function buildPrompt(profile: UserProfile): string {
   const goalMap: Record<string, string> = {
