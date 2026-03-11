@@ -62,3 +62,5 @@ planRouter.post("/generate", async (req: Request, res: Response) => {
     res.status(500).json({error: "Failed to save plan"});
   }
 });
+
+export default planRouter;
