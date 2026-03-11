@@ -5,6 +5,7 @@ type AuthContextType = {
     user: User | null;
     isLoading: boolean;
     saveProfile: (profile: Omit<UserProfile, 'userId' | 'updatedAt'>) => Promise<void>;
+    generateTrainingPlan: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);

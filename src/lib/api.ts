@@ -19,4 +19,7 @@ export const api = {
   saveProfile: (userId: string, profileData: Omit<UserProfile, "userId" | "updatedAt">) => {
     return post("/profile", {userId, ...profileData});
   },
+  generatePlan: (userId: string) => {
+    return post("/plan/generate", {userId});
+  },
 };

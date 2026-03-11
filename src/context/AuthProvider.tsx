@@ -35,8 +35,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await api.saveProfile(neonUser.id, profileData);
     }
 
+    const generateTrainingPlan = async () => {
+        if (!neonUser) {
+            throw new Error("User must be authenticated to generate training plan");
+        }
+
+        await api.generatePlan(neonUser.id)
+    }
+
     return (
-        <AuthContext.Provider value={{ user: neonUser, isLoading, saveProfile }}>
+        <AuthContext.Provider value={{ user: neonUser, isLoading, saveProfile, generateTrainingPlan }}>
             {children}
         </AuthContext.Provider>
     )
