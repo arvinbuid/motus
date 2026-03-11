@@ -3,7 +3,7 @@ import "dotenv/config";
 
 import {TrainingPlan, UserProfile} from "../../types/index.js";
 
-export const generatePlan = async (
+export const generateTrainingPlan = async (
   profile: UserProfile | Record<string, any>,
 ): Promise<Omit<TrainingPlan, "id" | "userId" | "version" | "createdAt">> => {
   // Normalize profile data
