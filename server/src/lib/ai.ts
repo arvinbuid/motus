@@ -37,7 +37,7 @@ export const generateTrainingPlan = async (
   // API call to openai
   try {
     const completion = await openai.chat.completions.create({
-      model: "nvidia/llama-nemotron-embed-vl-1b-v2:free",
+      model: "nvidia/nemotron-3-nano-30b-a3b:free",
       messages: [
         {
           role: "system",
@@ -83,7 +83,7 @@ function formatPlanResponse(
     weeklySchedule: (aiResponse.weeklySchedule || []).map((day: any) => ({
       day: day.day || "Day",
       focus: day.focus || "Focus",
-      exercises: (day.excercises || []).map((ex: any) => ({
+      exercises: (day.exercises || []).map((ex: any) => ({
         name: ex.name || "Exercise",
         sets: ex.sets || 3,
         reps: ex.reps || "8-12",
