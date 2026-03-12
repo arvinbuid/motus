@@ -18,7 +18,7 @@ planRouter.get("/current", async (req: Request, res: Response) => {
     });
 
     if (!plan) {
-      return res.status(400).json({error: "Plan not found"});
+      return res.status(404).json({error: "Plan not found"});
     }
 
     res.json({

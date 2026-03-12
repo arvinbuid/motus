@@ -1,11 +1,13 @@
 import { createContext, useContext } from "react";
-import type { User, UserProfile } from "../types";
+import type { TrainingPlan, User, UserProfile } from "../types";
 
 type AuthContextType = {
     user: User | null;
+    plan: TrainingPlan | null;
     isLoading: boolean;
     saveProfile: (profile: Omit<UserProfile, 'userId' | 'updatedAt'>) => Promise<void>;
     generateTrainingPlan: () => Promise<void>;
+    refreshData: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
