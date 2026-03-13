@@ -8,6 +8,7 @@ import { Button } from "../components/ui/Button";
 import { ArrowRight, Loader2 } from "lucide-react";
 import type { UserProfile } from "../types";
 import { useNavigate } from "react-router";
+import toast from "react-hot-toast";
 
 const goalOptions = [
     { value: "bulk", label: "Build Muscle (Bulk)" },
@@ -99,6 +100,7 @@ const Onboarding = () => {
             navigate("/profile");
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to save profile");
+            toast.error(error);
         } finally {
             setIsGenerating(false);
         }
