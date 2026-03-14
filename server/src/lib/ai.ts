@@ -27,7 +27,7 @@ export const generateTrainingPlan = async (
     baseURL: "https://openrouter.ai/api/v1",
     defaultHeaders: {
       "HTTP-Referer": process.env.BASE_URL || "http://localhost:3001",
-      "X-OpenRouter-Title": "Workout AI Planner",
+      "X-OpenRouter-Title": "Motus",
     },
   });
 
