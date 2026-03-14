@@ -13,8 +13,7 @@ const Navbar = () => {
                     to='/'
                     className="flex items-center gap-3 text-[(--color-foreground)]"
                 >
-                    <Dumbbell className="w-6 h-6 text-accent" />
-                    <span className="uppercase font-semibold text-lg tracking-wide">Logo Name</span>
+                    <span className="uppercase font-semibold text-lg tracking-wide">Motus.</span>
                 </Link>
 
                 <nav>
