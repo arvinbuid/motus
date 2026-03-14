@@ -29,7 +29,7 @@ const Home = () => {
                             </h1>
                             <p className="text-muted text-lg tracking-tight">Motus provides personalized training plan, modern equipment, and smart AI to help you lose fat, build muscle, and stay consistent.</p>
                             <Link to="/auth/sign-in">
-                                <Button className="mt-4" size="lg">Get Started</Button>
+                                <Button className="mt-4">Get Started</Button>
                             </Link>
                         </div>
                     </div>
