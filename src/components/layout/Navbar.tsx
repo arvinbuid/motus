@@ -1,4 +1,3 @@
-import { Dumbbell } from "lucide-react";
 import { Link } from "react-router";
 import { Button } from "../ui/Button";
 import { useAuth } from "../../context/AuthContext";
