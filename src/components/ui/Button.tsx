@@ -9,7 +9,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     (
         { className = "", variant = "primary", size = "md", children, ...props }, ref
     ) => {
-        const baseStyles = "inline-flex items-center justify-center font-medium transition-colors rounded-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer uppercase tracking-wide";
+        const baseStyles = "inline-flex items-center justify-center font-medium transition-colors rounded-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer uppercase tracking-wide";
 
         const variants = {
             primary:
