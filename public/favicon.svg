@@ -1,0 +1,47 @@
+<svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="220" height="220" rx="20" fill="#0a0a0a"/>
+
+  <g transform="translate(110, 110)">
+    <!-- Outer hex solid stroke -->
+    <polygon
+      points="0,-88 76.21,-44 76.21,44 0,88 -76.21,44 -76.21,-44"
+      fill="none"
+      stroke="#a1a1aa"
+      stroke-width="1.2"
+      stroke-opacity="0.4"
+    />
+    <!-- Lime dashed accent on hex edges -->
+    <polygon
+      points="0,-88 76.21,-44 76.21,44 0,88 -76.21,44 -76.21,-44"
+      fill="none"
+      stroke="#a3e635"
+      stroke-width="2"
+      stroke-dasharray="42 130"
+      stroke-linecap="round"
+      stroke-dashoffset="8"
+    />
+    <!-- Inner subtle fill -->
+    <polygon
+      points="0,-74 64,-37 64,37 0,74 -64,37 -64,-37"
+      fill="#a3e635"
+      fill-opacity="0.05"
+    />
+    <!-- Corner dots -->
+    <circle cx="0"       cy="-88"  r="3" fill="#a3e635" opacity="0.7"/>
+    <circle cx="76.21"  cy="-44"  r="3" fill="#a3e635" opacity="0.7"/>
+    <circle cx="76.21"  cy="44"   r="3" fill="#a3e635" opacity="0.7"/>
+    <circle cx="0"       cy="88"   r="3" fill="#a3e635" opacity="0.7"/>
+    <circle cx="-76.21" cy="44"   r="3" fill="#a3e635" opacity="0.7"/>
+    <circle cx="-76.21" cy="-44"  r="3" fill="#a3e635" opacity="0.7"/>
+    <!-- M letterform -->
+    <polyline
+      points="-34,37 -34,-29 0,16 34,-29 34,37"
+      fill="none"
+      stroke="#a3e635"
+      stroke-width="9"
+      stroke-linejoin="round"
+      stroke-linecap="round"
+    />
+  </g>
+</svg>
