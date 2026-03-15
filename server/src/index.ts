@@ -13,7 +13,7 @@ app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
 
-app.get("/", () => console.log("Server is live..."));
+app.get("/", (req, res) => res.send("Server is live..."));
 
 // API Routes
 app.use("/api/profile", profileRouter);
