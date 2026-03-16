@@ -13,14 +13,14 @@ AI-Powered Workout Planner built with React, Node.js, Express, PostgreSQL, and O
 
 ## Features
 
-🤖 AI-Powered Plan Generation — Let the AI automatically generate a fully personalized weekly workout plan based on your fitness goals, experience level, and available equipment
-📝 Manual Plan Customization — Build your own training plan by manually selecting your preferences and workout parameters if you want to be in control
-🔑 User Authentication — Secure sign-up, login, and session management powered by Neon Auth to keep your account protected
-📅 Weekly Schedule View — View your generated training plan in a clean weekly schedule layout with detailed exercise breakdowns per day
-💪 Exercise Details — Each workout includes exercise name, sets, reps, rest periods, RPE rating, form cues, and alternative exercise suggestions
-📈 Progression Guidance — Every generated plan includes a personalized progression strategy to help you continuously improve over time
-⚙️ Profile Management — Save and update your fitness profile including goal, experience level, session length, equipment access, and any injuries or limitations
-📱 Modern Responsive UI — Clean and intuitive interface designed for a seamless experience across both desktop and mobile devices
+- 🤖 AI-Powered Plan Generation — Let the AI automatically generate a fully personalized weekly workout plan based on your fitness goals, experience level, and available equipment
+- 📝 Manual Plan Customization — Build your own training plan by manually selecting your preferences and workout parameters if you want to be in control
+- 🔑 User Authentication — Secure sign-up, login, and session management powered by Neon Auth to keep your account protected
+- 📅 Weekly Schedule View — View your generated training plan in a clean weekly schedule layout with detailed exercise breakdowns per day
+- 💪 Exercise Details — Each workout includes exercise name, sets, reps, rest periods, RPE rating, form cues, and alternative exercise suggestions
+- 📈 Progression Guidance — Every generated plan includes a personalized progression strategy to help you continuously improve over time
+- ⚙️ Profile Management — Save and update your fitness profile including goal, experience level, session length, equipment access, and any injuries or limitations
+- 📱 Modern Responsive UI — Clean and intuitive interface designed for a seamless experience across both desktop and mobile devices
 
 ## Usage
 
