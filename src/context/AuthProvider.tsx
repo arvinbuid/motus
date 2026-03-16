@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [neonUser, setNeonUser] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [plan, setPlan] = useState<TrainingPlan | null>(null);
-    const [isGeneratingTrainingPlan, setIsGeneratingTrainingPlan] = useState(false);
+    const [isRegeneratingTrainingPlan, setIsRegeneratingTrainingPlan] = useState(false);
     const isRefreshingRef = useRef(false);
 
     // Load Neon User
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             throw new Error("User must be authenticated to generate training plan");
         }
 
-        setIsGeneratingTrainingPlan(true);
+        setIsRegeneratingTrainingPlan(true);
         try {
             await api.generatePlan(neonUser.id);
             await refreshData();
@@ -92,13 +92,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             console.error(error);
             toast.error("Failed to regenerate training plan.");
         } finally {
-            setIsGeneratingTrainingPlan(false);
+            setIsRegeneratingTrainingPlan(false);
         }
 
     }
 
     return (
-        <AuthContext.Provider value={{ user: neonUser, plan, isLoading, saveProfile, generateTrainingPlan, isGeneratingTrainingPlan, refreshData }}>
+        <AuthContext.Provider value={{ user: neonUser, plan, isLoading, saveProfile, generateTrainingPlan, isRegeneratingTrainingPlan, refreshData }}>
             {children}
         </AuthContext.Provider>
     )
