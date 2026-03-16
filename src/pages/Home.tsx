@@ -23,14 +23,16 @@ const Home = () => {
                         warpAmount={0}
                     />
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                        <div className="space-y-2">
-                            <h1 className="uppercase text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold font-bebas">
-                                <span className="text-accent">Fuel up</span> and light up your spirit.
-                            </h1>
-                            <p className="text-muted text-md sm:text-lg tracking-tight mt-4 md:mt-0">Motus provides personalized training plan, modern equipment, and smart AI to help you lose fat, build muscle, and stay consistent.</p>
-                            <Link to="/auth/sign-in">
-                                <Button className="mt-4">Get Started</Button>
-                            </Link>
+                        <div className="min-h-screen min-w-screen flex items-center justify-center">
+                            <div className="max-w-6xl sm:max-w-5xl md:max-w-2xl mx-auto space-y-2 p-8">
+                                <h1 className="uppercase text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold font-bebas">
+                                    <span className="text-accent">Fuel up</span> and light up your spirit.
+                                </h1>
+                                <p className="text-muted text-md sm:text-lg tracking-tight mt-4 md:mt-0">Motus provides personalized training plan, modern equipment, and smart AI to help you lose fat, build muscle, and stay consistent.</p>
+                                <Link to="/auth/sign-in">
+                                    <Button className="mt-4">Get Started</Button>
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
