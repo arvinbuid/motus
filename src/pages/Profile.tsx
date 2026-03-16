@@ -4,6 +4,52 @@ import { Button } from "../components/ui/Button";
 import { Calendar, DownloadIcon, Dumbbell, RefreshCcw, Target, TrendingUp } from "lucide-react";
 import { Card } from "../components/ui/Card";
 import PlanDisplay from "../components/plan/PlanDisplay";
+import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Font } from '@react-pdf/renderer';
+import type { TrainingPlan } from "../types";
+
+// Register fonts
+Font.register({
+    family: 'Roboto', fonts: [
+        { src: '/fonts/DMSans-Light.ttf' },
+        { src: '/fonts/DMSans-Regular.ttf' },
+        { src: '/fonts/DMSans-SemiBold.ttf' },
+    ]
+})
+
+// PDF styles
+const styles = StyleSheet.create({
+    page: { padding: 30, marginLeft: 20, fontFamily: "Roboto" },
+    title: { fontSize: 24, fontWeight: "bold", marginBottom: 4 },
+    subtitle: { fontSize: 12, color: "#555555", marginBottom: 16 },
+    section: { marginBottom: 14 },
+    dayHeader: { fontSize: 16, fontWeight: "bold", marginBottom: 6 },
+    exercise: { fontSize: 12, marginBottom: 4, paddingLeft: 10 },
+})
+
+const TrainingPlanPDF = ({ plan }: { plan: TrainingPlan }) => (
+    <Document>
+        <Page style={styles.page}>
+            <Text style={styles.title}>Motus - Your Training Plan</Text>
+            <Text style={styles.subtitle}>Version {plan.version} • {plan.overview.frequency}</Text>
+
+            {plan.weeklySchedule.map((day) => (
+                <View key={day.day} style={styles.section}>
+                    <Text style={styles.dayHeader}>{day.day} — {day.focus}</Text>
+                    {day.exercises.map((ex) => (
+                        <Text key={ex.name} style={styles.exercise}>
+                            • {ex.name}  {ex.sets}x{ex.reps}  Rest: {ex.rest}  RPE: {ex.rpe}
+                        </Text>
+                    ))}
+                </View>
+            ))}
+
+            <View style={{ fontSize: 12, marginTop: 12, width: "90%" }}>
+                <Text style={styles.dayHeader}>Progression Strategy: </Text>
+                <Text>{plan.progression}</Text>
+            </View>
+        </Page>
+    </Document>
+);
 
 const Profile = () => {
     const { user, isLoading, plan, generateTrainingPlan, isRegeneratingTrainingPlan } = useAuth();
@@ -38,13 +84,21 @@ const Profile = () => {
                     </div>
 
                     <div className="flex gap-3">
-                        <Button
-                            className="gap-2"
-                            variant="secondary"
+                        {/* Download PDF Button */}
+                        <PDFDownloadLink
+                            document={<TrainingPlanPDF plan={plan} />}
+                            fileName={`Training Plan v${plan.version}.pdf`}
                         >
-                            <DownloadIcon className="w-4 h-4" />
-                            Download as PDF
-                        </Button>
+                            {({ loading }) => (
+                                <Button
+                                    className="gap-2"
+                                    variant="secondary"
+                                >
+                                    <DownloadIcon className="w-4 h-4" />
+                                    {loading ? 'Preparing PDF...' : 'Download PDF'}
+                                </Button>
+                            )}
+                        </PDFDownloadLink>
                         <Button
                             className="gap-2"
                             onClick={async () => await generateTrainingPlan()}
