@@ -3,6 +3,7 @@ import { authClient } from "../lib/auth";
 import { AuthContext } from "./AuthContext";
 import type { TrainingPlan, UserProfile } from "../types";
 import { api } from "../lib/api";
+import toast from "react-hot-toast";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [neonUser, setNeonUser] = useState<any>(null);
@@ -86,8 +87,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             await api.generatePlan(neonUser.id);
             await refreshData();
+            toast.success("Training plan regenerated successfully!");
         } catch (error) {
             console.error(error);
+            toast.error("Failed to regenerate training plan.");
         } finally {
             setIsGeneratingTrainingPlan(false);
         }
