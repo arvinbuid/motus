@@ -6,7 +6,7 @@ import { Card } from "../components/ui/Card";
 import PlanDisplay from "../components/plan/PlanDisplay";
 
 const Profile = () => {
-    const { user, isLoading, plan, generateTrainingPlan } = useAuth();
+    const { user, isLoading, plan, generateTrainingPlan, isGeneratingTrainingPlan } = useAuth();
 
     if (!user && !isLoading) {
         return <Navigate to='/auth/sign-in' replace />;
@@ -40,9 +40,10 @@ const Profile = () => {
                     <Button
                         className="gap-2"
                         onClick={async () => await generateTrainingPlan()}
+                        disabled={isGeneratingTrainingPlan}
                     >
-                        <RefreshCcw className={'w-4 h-4'} />
-                        Regenerate Plan
+                        <RefreshCcw className={`w-4 h-4 ${isGeneratingTrainingPlan ? 'animate-spin' : ''}`} />
+                        {isGeneratingTrainingPlan ? 'Regenerating...' : 'Regenerate Plan'}
                     </Button>
                 </div>
 
