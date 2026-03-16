@@ -87,10 +87,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             await api.generatePlan(neonUser.id);
             await refreshData();
-            toast.success("Training plan regenerated successfully!");
+            toast.success("Training plan generated successfully!");
         } catch (error) {
             console.error(error);
-            toast.error("Failed to regenerate training plan.");
+            toast.error("Failed to generate training plan.");
         } finally {
             setIsRegeneratingTrainingPlan(false);
         }
