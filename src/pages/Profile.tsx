@@ -83,7 +83,7 @@ const Profile = () => {
                         </p>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-col md:flex-row gap-3 mt-2 md:mt-0">
                         {/* Download PDF Button */}
                         <PDFDownloadLink
                             document={<TrainingPlanPDF plan={plan} />}
@@ -91,7 +91,7 @@ const Profile = () => {
                         >
                             {({ loading }) => (
                                 <Button
-                                    className="gap-2"
+                                    className="gap-2 w-full"
                                     variant="secondary"
                                 >
                                     <DownloadIcon className="w-4 h-4" />

@@ -56,12 +56,12 @@ function ExerciseRow({ exercise, index }: { exercise: Exercise, index: number })
     return (
         <tr className="border-b border-border last:border-0">
             {/* Exercise */}
-            <td className="py-3 pr-4">
+            <td className="py-3 pr-2 md:pr-0">
                 <div className="flex items-start gap-3">
                     <span className="text-xs text-muted w-5">
                         {index + 1}.
                     </span>
-                    <div>
+                    <div className="w-50">
                         <p className="font-medium">{exercise.name}</p>
                         {exercise.notes && (
                             <p className="text-xs text-muted mt-0.5 flex items-center gap-1">
