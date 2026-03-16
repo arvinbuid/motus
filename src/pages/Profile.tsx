@@ -1,7 +1,7 @@
 import { Navigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "../components/ui/Button";
-import { Calendar, Dumbbell, RefreshCcw, Target, TrendingUp } from "lucide-react";
+import { Calendar, DownloadIcon, Dumbbell, RefreshCcw, Target, TrendingUp } from "lucide-react";
 import { Card } from "../components/ui/Card";
 import PlanDisplay from "../components/plan/PlanDisplay";
 
@@ -37,14 +37,23 @@ const Profile = () => {
                         </p>
                     </div>
 
-                    <Button
-                        className="gap-2"
-                        onClick={async () => await generateTrainingPlan()}
-                        disabled={isRegeneratingTrainingPlan}
-                    >
-                        <RefreshCcw className={`w-4 h-4 ${isRegeneratingTrainingPlan ? 'animate-spin' : ''}`} />
-                        {isRegeneratingTrainingPlan ? 'Regenerating...' : 'Regenerate Plan'}
-                    </Button>
+                    <div className="flex gap-3">
+                        <Button
+                            className="gap-2"
+                            variant="secondary"
+                        >
+                            <DownloadIcon className="w-4 h-4" />
+                            Download as PDF
+                        </Button>
+                        <Button
+                            className="gap-2"
+                            onClick={async () => await generateTrainingPlan()}
+                            disabled={isRegeneratingTrainingPlan}
+                        >
+                            <RefreshCcw className={`w-4 h-4 ${isRegeneratingTrainingPlan ? 'animate-spin' : ''}`} />
+                            {isRegeneratingTrainingPlan ? 'Regenerating...' : 'Regenerate Plan'}
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Plan Overview Cards */}
