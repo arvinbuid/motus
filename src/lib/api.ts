@@ -3,7 +3,7 @@ import type {UserProfile} from "../types";
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 // Reusable helper functions
-async function get(path: string) {
+export async function get(path: string) {
   const res = await fetch(`${BASE_URL}/api${path}`);
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Request failed");
   return res.json();
