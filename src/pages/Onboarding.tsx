@@ -1,5 +1,7 @@
 import { RedirectToSignIn, SignedIn } from "@neondatabase/neon-js/auth/react";
 import { useAuth } from "../context/AuthContext";
+import { useCurrentPlan } from "../hooks/useCurrentPlan";
+import { useCurrentProfile } from "../hooks/useCurrentProfile";
 import { Card } from "../components/ui/Card";
 import { Select } from "../components/ui/Select";
 import { useState } from "react";
@@ -7,7 +9,7 @@ import { Textarea } from "../components/ui/TextArea";
 import { Button } from "../components/ui/Button";
 import { ArrowRight, Loader2 } from "lucide-react";
 import type { UserProfile } from "../types";
-import { useNavigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 import toast from "react-hot-toast";
 
 const goalOptions = [
@@ -56,25 +58,45 @@ const splitOptions = [
     { value: "custom", label: "Let AI Decide" },
 ];
 
+const defaultFormData = {
+    goal: "bulk",
+    experience: "beginner",
+    daysPerWeek: "2",
+    sessionLength: "30",
+    equipment: "full_gym",
+    injuries: "",
+    preferredSplit: "full_body",
+};
 
-const Onboarding = () => {
-    const { user, saveProfile, generateTrainingPlan } = useAuth();
-    const [formData, setFormData] = useState({
-        goal: "bulk",
-        experience: "beginner",
-        daysPerWeek: "2",
-        sessionLength: "30",
-        equipment: "full_gym",
-        injuries: "",
-        preferredSplit: "full_body",
-    })
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [error, setError] = useState("");
-    const navigate = useNavigate();
+type OnboardingFormData = typeof defaultFormData;
 
-    if (!user) {
-        return <RedirectToSignIn />
+function toFormData(profile: UserProfile | null | undefined): OnboardingFormData {
+    if (!profile) {
+        return defaultFormData;
     }
+
+    return {
+        goal: profile.goal,
+        experience: profile.experience,
+        daysPerWeek: String(profile.daysPerWeek),
+        sessionLength: String(profile.sessionLength),
+        equipment: profile.equipment,
+        injuries: profile.injuries ?? "",
+        preferredSplit: profile.preferredSplit,
+    };
+}
+
+function OnboardingForm({
+    initialFormData,
+    hasExistingProfile,
+}: {
+    initialFormData: OnboardingFormData;
+    hasExistingProfile: boolean;
+}) {
+    const { saveProfile, generateTrainingPlan } = useAuth();
+    const [formData, setFormData] = useState(initialFormData);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const navigate = useNavigate();
 
     const updateForm = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }))
@@ -94,95 +116,165 @@ const Onboarding = () => {
         }
 
         try {
-            await saveProfile(profile);
             setIsGenerating(true);
+            await saveProfile(profile);
             await generateTrainingPlan();
             navigate("/profile");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to save profile");
-            toast.error(error);
+            toast.error(err instanceof Error ? err.message : "Failed to save profile");
         } finally {
             setIsGenerating(false);
         }
     }
 
     return (
-        <SignedIn>
-            <div className="min-h-screen pt-24 pb-12 px-6">
-                <div className="max-w-lg mx-auto">
-                    {/* Questionnaire */}
-                    {!isGenerating ? (<Card variant="bordered">
-                        <h1 className="text-2xl font-bold mb-2">Tell Us About Yourself</h1>
-                        <p className="text-muted mb-6">Help us create a perfect plan for you.</p>
-                        <form onSubmit={handleSubmitQuestionnaire} className="space-y-5">
-                            <Select
-                                id="goal"
-                                label="What's your primary goal?"
-                                options={goalOptions}
-                                value={formData.goal}
-                                onChange={(e) => updateForm("goal", e.target.value)}
-                            />
-                            <Select
-                                id="experience"
-                                label="Training experience"
-                                options={experienceOptions}
-                                value={formData.experience}
-                                onChange={(e) => updateForm("experience", e.target.value)}
-                            />
-                            <div className="grid grid-cols-2 gap-4">
-                                <Select
-                                    id="daysPerWeek"
-                                    label="Days per week"
-                                    options={daysOptions}
-                                    value={formData.daysPerWeek}
-                                    onChange={(e) => updateForm("daysPerWeek", e.target.value)}
-                                />
-                                <Select
-                                    id="sessionLength"
-                                    label="Session length"
-                                    options={sessionOptions}
-                                    value={formData.sessionLength}
-                                    onChange={(e) => updateForm("sessionLength", e.target.value)}
-                                />
-                            </div>
-                            <Select
-                                id="equipment"
-                                label="Equipment access"
-                                options={equipmentOptions}
-                                value={formData.equipment}
-                                onChange={(e) => updateForm("equipment", e.target.value)}
-                            />
-                            <Select
-                                id="preferredSplit"
-                                label="Preferred training split"
-                                options={splitOptions}
-                                value={formData.preferredSplit}
-                                onChange={(e) => updateForm("preferredSplit", e.target.value)}
-                            />
+        <div className="max-w-lg mx-auto">
+            {!isGenerating ? (<Card variant="bordered">
+                <h1 className="text-2xl font-bold mb-2">Tell Us About Yourself</h1>
+                <p className="text-muted mb-6">Help us create a perfect plan for you.</p>
+                <form onSubmit={handleSubmitQuestionnaire} className="space-y-5">
+                    <Select
+                        id="goal"
+                        label="What's your primary goal?"
+                        options={goalOptions}
+                        value={formData.goal}
+                        onChange={(e) => updateForm("goal", e.target.value)}
+                    />
+                    <Select
+                        id="experience"
+                        label="Training experience"
+                        options={experienceOptions}
+                        value={formData.experience}
+                        onChange={(e) => updateForm("experience", e.target.value)}
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                        <Select
+                            id="daysPerWeek"
+                            label="Days per week"
+                            options={daysOptions}
+                            value={formData.daysPerWeek}
+                            onChange={(e) => updateForm("daysPerWeek", e.target.value)}
+                        />
+                        <Select
+                            id="sessionLength"
+                            label="Session length"
+                            options={sessionOptions}
+                            value={formData.sessionLength}
+                            onChange={(e) => updateForm("sessionLength", e.target.value)}
+                        />
+                    </div>
+                    <Select
+                        id="equipment"
+                        label="Equipment access"
+                        options={equipmentOptions}
+                        value={formData.equipment}
+                        onChange={(e) => updateForm("equipment", e.target.value)}
+                    />
+                    <Select
+                        id="preferredSplit"
+                        label="Preferred training split"
+                        options={splitOptions}
+                        value={formData.preferredSplit}
+                        onChange={(e) => updateForm("preferredSplit", e.target.value)}
+                    />
 
-                            <Textarea
-                                id="injuries"
-                                label="Any injuries or limitations? (optional)"
-                                placeholder="E.g., lower back issues, shoulder impingement..."
-                                rows={3}
-                                value={formData.injuries}
-                                onChange={(e) => updateForm("injuries", e.target.value)}
-                            />
+                    <Textarea
+                        id="injuries"
+                        label="Any injuries or limitations? (optional)"
+                        placeholder="E.g., lower back issues, shoulder impingement..."
+                        rows={3}
+                        value={formData.injuries}
+                        onChange={(e) => updateForm("injuries", e.target.value)}
+                    />
 
-                            <div className="flex pt-1">
-                                <Button className="flex-1 gap-2" type="submit">
-                                    Generate My Plan <ArrowRight className="w-4 h-4" />
-                                </Button>
-                            </div>
-                        </form>
-                    </Card>) : (
+                    <div className="flex pt-1">
+                        <Button className="flex-1 gap-2" type="submit">
+                            {hasExistingProfile && "Generate My Plan"} <ArrowRight className="w-4 h-4" />
+                        </Button>
+                    </div>
+                </form>
+            </Card>) : (
+                <Card variant="bordered" className="py-16 text-center">
+                    <Loader2 className="w-14 h-14 text-accent animate-spin mx-auto mb-4" />
+                    <h2 className="text-2xl font-bold mb-2">Generating your plan...</h2>
+                    <p className="text-muted">Our AI is building your personalized training program.</p>
+                </Card>
+            )}
+        </div>
+    );
+}
+
+const Onboarding = () => {
+    const { user } = useAuth();
+    const { data: existingPlan, isLoading: isPlanLoading, error: planError } = useCurrentPlan();
+    const { data: existingProfile, isLoading: isProfileLoading, error: profileError } = useCurrentProfile();
+
+    if (!user) {
+        return <RedirectToSignIn />
+    }
+
+    if (existingPlan) {
+        return <Navigate to='/profile' replace />
+    }
+
+    if (isPlanLoading || isProfileLoading) {
+        return (
+            <SignedIn>
+                <div className="min-h-screen pt-24 pb-12 px-6">
+                    <div className="max-w-lg mx-auto">
                         <Card variant="bordered" className="py-16 text-center">
                             <Loader2 className="w-14 h-14 text-accent animate-spin mx-auto mb-4" />
-                            <h2 className="text-2xl font-bold mb-2">Generating your plan...</h2>
-                            <p className="text-muted">Our AI is building your personalized training program.</p>
+                            <h2 className="text-2xl font-bold mb-2">Loading your profile...</h2>
+                            <p className="text-muted">Preparing your saved preferences.</p>
                         </Card>
-                    )}
+                    </div>
                 </div>
+            </SignedIn>
+        );
+    }
+
+    if (planError) {
+        return (
+            <SignedIn>
+                <div className="min-h-screen pt-24 pb-12 px-6">
+                    <div className="max-w-lg mx-auto">
+                        <Card variant="bordered" className="py-16 text-center">
+                            <h2 className="text-2xl font-bold mb-2">Unable to load your plan</h2>
+                            <p className="text-muted">
+                                {planError instanceof Error ? planError.message : "Something went wrong while loading your training plan."}
+                            </p>
+                        </Card>
+                    </div>
+                </div>
+            </SignedIn>
+        );
+    }
+
+    if (profileError) {
+        return (
+            <SignedIn>
+                <div className="min-h-screen pt-24 pb-12 px-6">
+                    <div className="max-w-lg mx-auto">
+                        <Card variant="bordered" className="py-16 text-center">
+                            <h2 className="text-2xl font-bold mb-2">Unable to load your profile</h2>
+                            <p className="text-muted">
+                                {profileError instanceof Error ? profileError.message : "Something went wrong while loading your saved preferences."}
+                            </p>
+                        </Card>
+                    </div>
+                </div>
+            </SignedIn>
+        );
+    }
+
+    return (
+        <SignedIn>
+            <div className="min-h-screen pt-24 pb-12 px-6">
+                <OnboardingForm
+                    key={user.id}
+                    initialFormData={toFormData(existingProfile)}
+                    hasExistingProfile={!!existingProfile}
+                />
             </div>
         </SignedIn>
     );

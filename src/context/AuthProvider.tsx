@@ -1,16 +1,18 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { authClient } from "../lib/auth";
 import { AuthContext } from "./AuthContext";
-import type { TrainingPlan, UserProfile } from "../types";
+import { currentPlanOptions } from "../hooks/useCurrentPlan";
+import { currentProfileOptions } from "../hooks/useCurrentProfile";
+import type { UserProfile } from "../types";
 import { api } from "../lib/api";
 import toast from "react-hot-toast";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [neonUser, setNeonUser] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [plan, setPlan] = useState<TrainingPlan | null>(null);
     const [isRegeneratingTrainingPlan, setIsRegeneratingTrainingPlan] = useState(false);
-    const isRefreshingRef = useRef(false);
+    const queryClient = useQueryClient();
 
     // Load Neon User
     useEffect(() => {
@@ -31,51 +33,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         loadUser();
     }, [])
 
-    // Refresh data memoized function
-    const refreshData = useCallback(async () => {
-        if (!neonUser || isRefreshingRef.current) return;
-        isRefreshingRef.current = true;
-
-        try {
-            // Fetch current plan
-            const planData = await api.getCurrentPlan(neonUser.id).catch(() => null);
-            if (planData) {
-                setPlan({
-                    id: planData.id,
-                    userId: planData.userId,
-                    overview: planData.planJson.overview,
-                    weeklySchedule: planData.planJson.weeklySchedule,
-                    progression: planData.planJson.progression,
-                    version: planData.version,
-                    createdAt: planData.createdAt,
-                })
-            }
-        } catch (error) {
-            console.error('Error refreshing data:', error);
-        } finally {
-            isRefreshingRef.current = false;
-        }
-    }, [neonUser]);
-
-    useEffect(() => {
-        if (!isLoading) {
-            if (neonUser?.id) {
-                refreshData();
-            } else {
-                setPlan(null);
-            }
-            setIsLoading(false);
-        }
-    }, [neonUser?.id, isLoading, refreshData]);
-
-
     const saveProfile = async (profileData: Omit<UserProfile, 'userId' | 'updatedAt'>) => {
         if (!neonUser) {
             throw new Error("User must be authenticated to save profile");
         }
 
         await api.saveProfile(neonUser.id, profileData);
-        await refreshData();
+        await queryClient.invalidateQueries({ queryKey: currentProfileOptions(neonUser.id).queryKey });
     }
 
     const generateTrainingPlan = async () => {
@@ -86,7 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsRegeneratingTrainingPlan(true);
         try {
             await api.generatePlan(neonUser.id);
-            await refreshData();
+            await queryClient.invalidateQueries({ queryKey: currentPlanOptions(neonUser.id).queryKey });
             toast.success("Training plan generated successfully!");
         } catch (error) {
             console.error(error);
@@ -98,7 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user: neonUser, plan, isLoading, saveProfile, generateTrainingPlan, isRegeneratingTrainingPlan, refreshData }}>
+        <AuthContext.Provider value={{ user: neonUser, isLoading, saveProfile, generateTrainingPlan, isRegeneratingTrainingPlan }}>
             {children}
         </AuthContext.Provider>
     )

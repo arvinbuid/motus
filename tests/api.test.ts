@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest';
-import {get} from '../src/lib/api';
+import {ApiError, api, get} from '../src/lib/api';
 
 describe('get helper (msw)', () => {
     it('returns data when request is okay', async () => {
@@ -14,6 +14,30 @@ describe('get helper (msw)', () => {
 
     it('throws default error if JSON parsing fails', async () => {
         await expect(get('/bad-request')).rejects.toThrow('Request failed');
+    });
+
+    it('maps profile payloads into the frontend shape', async () => {
+        const result = await api.getProfile('user-123');
+
+        expect(result).toEqual({
+            userId: 'user-123',
+            goal: 'bulk',
+            experience: 'intermediate',
+            daysPerWeek: 4,
+            sessionLength: 60,
+            equipment: 'full_gym',
+            injuries: 'None',
+            preferredSplit: 'upper_lower',
+            updatedAt: '2026-03-10T10:00:00.000Z',
+        });
+    });
+
+    it('preserves HTTP status in ApiError for profile requests', async () => {
+        await expect(api.getProfile('missing-user')).rejects.toMatchObject<ApiError>({
+            name: 'ApiError',
+            status: 404,
+            message: 'Profile not found',
+        });
     });
     
 })

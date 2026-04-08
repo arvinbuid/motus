@@ -1,7 +1,8 @@
 import { Navigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
+import { useCurrentPlan } from "../hooks/useCurrentPlan";
 import { Button } from "../components/ui/Button";
-import { Calendar, DownloadIcon, Dumbbell, RefreshCcw, Target, TrendingUp } from "lucide-react";
+import { Calendar, DownloadIcon, Dumbbell, Loader2, RefreshCcw, Target, TrendingUp } from "lucide-react";
 import { Card } from "../components/ui/Card";
 import PlanDisplay from "../components/plan/PlanDisplay";
 import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Font } from '@react-pdf/renderer';
@@ -52,10 +53,40 @@ const TrainingPlanPDF = ({ plan }: { plan: TrainingPlan }) => (
 );
 
 const Profile = () => {
-    const { user, isLoading, plan, generateTrainingPlan, isRegeneratingTrainingPlan } = useAuth();
+    const { user, isLoading, generateTrainingPlan, isRegeneratingTrainingPlan } = useAuth();
+    const { data: plan, isLoading: isPlanLoading, error: planError } = useCurrentPlan();
 
     if (!user && !isLoading) {
         return <Navigate to='/auth/sign-in' replace />;
+    }
+
+    if (isLoading || (user && isPlanLoading)) {
+        return (
+            <div className="min-h-screen pt-24 pb-12 px-6">
+                <div className="max-w-4xl mx-auto">
+                    <Card variant="bordered" className="py-16 text-center">
+                        <Loader2 className="w-10 h-10 text-accent animate-spin mx-auto mb-4" />
+                        <h1 className="text-2xl font-bold mb-2">Loading your training plan...</h1>
+                        <p className="text-muted">Fetching your latest personalized program.</p>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
+
+    if (planError) {
+        return (
+            <div className="min-h-screen pt-24 pb-12 px-6">
+                <div className="max-w-4xl mx-auto">
+                    <Card variant="bordered" className="py-16 text-center">
+                        <h1 className="text-2xl font-bold mb-2">Unable to load your plan</h1>
+                        <p className="text-muted">
+                            {planError instanceof Error ? planError.message : "Something went wrong while loading your training plan."}
+                        </p>
+                    </Card>
+                </div>
+            </div>
+        );
     }
 
     if (!plan) {
