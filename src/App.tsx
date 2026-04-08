@@ -1,6 +1,4 @@
 import { Route, Routes } from "react-router"
-import { NeonAuthUIProvider } from '@neondatabase/neon-js/auth/react';
-import { authClient } from './lib/auth';
 import Home from "./pages/Home"
 import Account from "./pages/Account"
 import Auth from "./pages/Auth"
