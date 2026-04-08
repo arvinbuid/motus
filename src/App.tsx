@@ -12,27 +12,21 @@ import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
-    <NeonAuthUIProvider
-      authClient={authClient}
-      defaultTheme="dark"
-      redirectTo="/profile"
-    >
-      <AuthProvider>
-        <main className="min-h-screen flex flex-col">
-          <Navbar />
-          <div className="flex-1">
-            <Toaster />
-            <Routes>
-              <Route index element={<Home />} />
-              <Route path='/account/:pathname' element={<Account />} />
-              <Route path='/auth/:pathname' element={<Auth />} />
-              <Route path='/onboarding' element={<Onboarding />} />
-              <Route path='/profile' element={<Profile />} />
-            </Routes>
-          </div>
-        </main>
-      </AuthProvider>
-    </NeonAuthUIProvider >
+    <AuthProvider>
+      <main className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1">
+          <Toaster />
+          <Routes>
+            <Route index element={<Home />} />
+            <Route path='/account/:pathname' element={<Account />} />
+            <Route path='/auth/:pathname' element={<Auth />} />
+            <Route path='/onboarding' element={<Onboarding />} />
+            <Route path='/profile' element={<Profile />} />
+          </Routes>
+        </div>
+      </main>
+    </AuthProvider>
   )
 }
 
