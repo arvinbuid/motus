@@ -1,6 +1,6 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
-import { useAuth } from "../context/AuthContext";
-import { api, ApiError } from "../lib/api";
+import {queryOptions, useQuery} from "@tanstack/react-query";
+import {useAuth} from "../context/AuthContext";
+import {api, ApiError} from "../lib/api";
 
 export function currentPlanOptions(userId?: string) {
   return queryOptions({
@@ -27,11 +27,13 @@ export function currentPlanOptions(userId?: string) {
 
       return failureCount < 2;
     },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 2 * 60 * 1000, // 2 minutes
   });
 }
 
 export function useCurrentPlan() {
-  const { user } = useAuth();
+  const {user} = useAuth();
 
   return useQuery(currentPlanOptions(user?.id));
 }
