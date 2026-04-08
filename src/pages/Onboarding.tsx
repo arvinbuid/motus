@@ -2,6 +2,7 @@ import { RedirectToSignIn, SignedIn } from "@neondatabase/neon-js/auth/react";
 import { useAuth } from "../context/AuthContext";
 import { useCurrentPlan } from "../hooks/useCurrentPlan";
 import { useCurrentProfile } from "../hooks/useCurrentProfile";
+import { useGenerateTrainingPlan, useSaveProfile } from "../hooks/useMutations";
 import { Card } from "../components/ui/Card";
 import { Select } from "../components/ui/Select";
 import { useState } from "react";
@@ -10,7 +11,6 @@ import { Button } from "../components/ui/Button";
 import { ArrowRight, Loader2 } from "lucide-react";
 import type { UserProfile } from "../types";
 import { Navigate, useNavigate } from "react-router";
-import toast from "react-hot-toast";
 
 const goalOptions = [
     { value: "bulk", label: "Build Muscle (Bulk)" },
@@ -93,10 +93,11 @@ function OnboardingForm({
     initialFormData: OnboardingFormData;
     hasExistingProfile: boolean;
 }) {
-    const { saveProfile, generateTrainingPlan } = useAuth();
+    const saveProfile = useSaveProfile();
+    const generateTrainingPlan = useGenerateTrainingPlan();
     const [formData, setFormData] = useState(initialFormData);
-    const [isGenerating, setIsGenerating] = useState(false);
     const navigate = useNavigate();
+    const isGenerating = saveProfile.isPending || generateTrainingPlan.isPending;
 
     const updateForm = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }))
@@ -116,14 +117,11 @@ function OnboardingForm({
         }
 
         try {
-            setIsGenerating(true);
-            await saveProfile(profile);
-            await generateTrainingPlan();
+            await saveProfile.mutateAsync(profile)
+            await generateTrainingPlan.mutateAsync();
             navigate("/profile");
-        } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Failed to save profile");
-        } finally {
-            setIsGenerating(false);
+        } catch {
+            return;
         }
     }
 
@@ -188,8 +186,8 @@ function OnboardingForm({
                     />
 
                     <div className="flex pt-1">
-                        <Button className="flex-1 gap-2" type="submit">
-                            {hasExistingProfile && "Generate My Plan"} <ArrowRight className="w-4 h-4" />
+                        <Button className="flex-1 gap-2" type="submit" disabled={isGenerating}>
+                            {hasExistingProfile ? "Update Profile & Generate Plan" : "Generate My Plan"} <ArrowRight className="w-4 h-4" />
                         </Button>
                     </div>
                 </form>

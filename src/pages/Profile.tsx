@@ -1,6 +1,7 @@
 import { Navigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { useCurrentPlan } from "../hooks/useCurrentPlan";
+import { useGenerateTrainingPlan } from "../hooks/useMutations";
 import { Button } from "../components/ui/Button";
 import { Calendar, DownloadIcon, Dumbbell, Loader2, RefreshCcw, Target, TrendingUp } from "lucide-react";
 import { Card } from "../components/ui/Card";
@@ -53,8 +54,9 @@ const TrainingPlanPDF = ({ plan }: { plan: TrainingPlan }) => (
 );
 
 const Profile = () => {
-    const { user, isLoading, generateTrainingPlan, isRegeneratingTrainingPlan } = useAuth();
+    const { user, isLoading } = useAuth();
     const { data: plan, isLoading: isPlanLoading, error: planError } = useCurrentPlan();
+    const generateTrainingPlan = useGenerateTrainingPlan();
 
     if (!user && !isLoading) {
         return <Navigate to='/auth/sign-in' replace />;
@@ -132,11 +134,11 @@ const Profile = () => {
                         </PDFDownloadLink>
                         <Button
                             className="gap-2"
-                            onClick={async () => await generateTrainingPlan()}
-                            disabled={isRegeneratingTrainingPlan}
+                            onClick={async () => await generateTrainingPlan.mutateAsync()}
+                            disabled={generateTrainingPlan.isPending}
                         >
-                            <RefreshCcw className={`w-4 h-4 ${isRegeneratingTrainingPlan ? 'animate-spin' : ''}`} />
-                            {isRegeneratingTrainingPlan ? 'Regenerating...' : 'Regenerate Plan'}
+                            <RefreshCcw className={`w-4 h-4 ${generateTrainingPlan.isPending ? 'animate-spin' : ''}`} />
+                            {generateTrainingPlan.isPending ? 'Regenerating...' : 'Regenerate Plan'}
                         </Button>
                     </div>
                 </div>
