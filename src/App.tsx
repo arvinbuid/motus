@@ -17,7 +17,7 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <NeonAuthUIProvider authClient={authClient} defaultTheme="dark">
+      <NeonAuthUIProvider authClient={authClient} defaultTheme="dark" redirectTo="/profile">
         <AuthProvider>
           <BrowserRouter>
             <main className="min-h-screen flex flex-col">
