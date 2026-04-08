@@ -28,6 +28,14 @@ const styles = StyleSheet.create({
     exercise: { fontSize: 12, marginBottom: 4, paddingLeft: 10 },
 })
 
+// Format split type
+const formatSplitType = (splitType: string): string => {
+    return splitType
+        .split('_')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ')
+};
+
 const TrainingPlanPDF = ({ plan }: { plan: TrainingPlan }) => (
     <Document>
         <Page style={styles.page}>
@@ -169,7 +177,7 @@ const Profile = () => {
                         </div>
                         <div>
                             <p className="text-xs text-muted">Split</p>
-                            <p className="font-medium text-sm">{plan.overview.split}</p>
+                            <p className="font-medium text-sm">{formatSplitType(plan.overview.split)}</p>
                         </div>
                     </Card>
                     <Card variant="bordered" className="flex items-center gap-3">
