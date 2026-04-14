@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import {useAuth} from "../context/AuthContext";
 import {api} from "../lib/api";
 import {currentPlanOptions} from "./useCurrentPlan";
+import {planHistoryOptions} from "./usePlanHistory";
 import {currentProfileOptions} from "./useCurrentProfile";
 import type {UserProfile} from "../types";
 
@@ -32,6 +33,7 @@ export function generateTrainingPlanMutationOptions(
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({queryKey: currentPlanOptions(userId).queryKey});
+      await queryClient.invalidateQueries({queryKey: planHistoryOptions(userId).queryKey});
       toast.success("Training plan generated successfully!");
     },
     onError: (error) => {

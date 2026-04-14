@@ -1,4 +1,4 @@
-import type {TrainingPlan, UserProfile} from "../types";
+import type {PlanHistoryEntry, TrainingPlan, UserProfile} from "../types";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
@@ -15,7 +15,9 @@ export class ApiError extends Error {
 // Reusable helper functions
 export async function get(path: string) {
   const res = await fetch(`${BASE_URL}/api${path}`);
-  if (!res.ok) throw new ApiError((await res.json().catch(() => ({}))).error || "Request failed", res.status);
+  if (!res.ok) {
+    throw new ApiError((await res.json().catch(() => ({}))).error || "Request failed", res.status);
+  }
   return res.json();
 }
 
@@ -26,7 +28,8 @@ async function post(path: string, body: object) {
     body: JSON.stringify(body),
   });
 
-  if (!res.ok) throw new ApiError((await res.json().catch(() => ({}))).error || "Request failed", res.status);
+  if (!res.ok)
+    throw new ApiError((await res.json().catch(() => ({}))).error || "Request failed", res.status);
 
   return res.json();
 }
@@ -57,6 +60,18 @@ function mapUserProfile(profileData: any): UserProfile {
   };
 }
 
+function mapPlanHistoryEntry(planData: any): PlanHistoryEntry {
+  return {
+    id: planData.id,
+    userId: planData.userId,
+    version: planData.version,
+    createdAt: planData.createdAt,
+    overview: planData.overview ?? null,
+    workoutDays: planData.workoutDays ?? 0,
+    totalExercises: planData.totalExercises ?? 0,
+  };
+}
+
 export const api = {
   async getProfile(userId: string): Promise<UserProfile> {
     const profileData = await get(`/profile?userId=${userId}`);
@@ -71,5 +86,9 @@ export const api = {
   async getCurrentPlan(userId: string): Promise<TrainingPlan> {
     const planData = await get(`/plan/current?userId=${userId}`);
     return mapTrainingPlan(planData);
+  },
+  async getPlanHistory(userId: string): Promise<PlanHistoryEntry[]> {
+    const planHistoryData = await get(`/plan/history?userId=${userId}`);
+    return Array.isArray(planHistoryData) ? planHistoryData.map(mapPlanHistoryEntry) : [];
   },
 };

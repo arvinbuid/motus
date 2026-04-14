@@ -1,13 +1,16 @@
 import { Navigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { useCurrentPlan } from "../hooks/useCurrentPlan";
+import { usePlanHistory } from "../hooks/usePlanHistory";
 import { useGenerateTrainingPlan } from "../hooks/useMutations";
 import { Button } from "../components/ui/Button";
 import { Calendar, DownloadIcon, Dumbbell, Loader2, RefreshCcw, Target, TrendingUp } from "lucide-react";
 import { Card } from "../components/ui/Card";
 import PlanDisplay from "../components/plan/PlanDisplay";
+import PlanHistory from "../components/plan/PlanHistory";
 import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Font } from '@react-pdf/renderer';
 import type { TrainingPlan } from "../types";
+import { formatSplitType } from "../lib/utils";
 
 // Register fonts
 Font.register({
@@ -27,14 +30,6 @@ const styles = StyleSheet.create({
     dayHeader: { fontSize: 16, fontWeight: "bold", marginBottom: 6 },
     exercise: { fontSize: 12, marginBottom: 4, paddingLeft: 10 },
 })
-
-// Format split type
-const formatSplitType = (splitType: string): string => {
-    return splitType
-        .split('_')
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-        .join(' ')
-};
 
 const TrainingPlanPDF = ({ plan }: { plan: TrainingPlan }) => (
     <Document>
@@ -64,6 +59,7 @@ const TrainingPlanPDF = ({ plan }: { plan: TrainingPlan }) => (
 const Profile = () => {
     const { user, isLoading } = useAuth();
     const { data: plan, isLoading: isPlanLoading, error: planError } = useCurrentPlan();
+    const { data: planHistory = [], isLoading: isPlanHistoryLoading, error: planHistoryError } = usePlanHistory();
     const generateTrainingPlan = useGenerateTrainingPlan();
 
     if (!user && !isLoading) {
@@ -212,6 +208,13 @@ const Profile = () => {
                         {plan.progression}
                     </p>
                 </Card>
+
+                <PlanHistory
+                    entries={planHistory}
+                    currentPlanId={plan.id}
+                    isLoading={isPlanHistoryLoading}
+                    error={planHistoryError instanceof Error ? planHistoryError : null}
+                />
             </div>
         </div>
     );

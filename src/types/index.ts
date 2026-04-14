@@ -46,3 +46,13 @@ export interface TrainingPlan {
   version: number;
   createdAt: string;
 }
+
+export interface PlanHistoryEntry {
+  id: string;
+  userId: string;
+  version: number;
+  createdAt: string;
+  overview: PlanOverview | null;
+  workoutDays: number;
+  totalExercises: number;
+}

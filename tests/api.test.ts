@@ -39,5 +39,40 @@ describe('get helper (msw)', () => {
             message: 'Profile not found',
         });
     });
+
+    it('maps plan history payloads into the frontend shape', async () => {
+        const result = await api.getPlanHistory('user-123');
+
+        expect(result).toEqual([
+            {
+                id: 'plan-2',
+                userId: 'user-123',
+                version: 2,
+                createdAt: '2026-03-12T09:30:00.000Z',
+                overview: {
+                    goal: 'Build Muscle',
+                    frequency: '4 days per week',
+                    split: 'upper_lower',
+                    notes: 'Focus on progressive overload.',
+                },
+                workoutDays: 4,
+                totalExercises: 20,
+            },
+            {
+                id: 'plan-1',
+                userId: 'user-123',
+                version: 1,
+                createdAt: '2026-03-10T09:30:00.000Z',
+                overview: {
+                    goal: 'Build Muscle',
+                    frequency: '4 days per week',
+                    split: 'full_body',
+                    notes: 'Start with fundamentals.',
+                },
+                workoutDays: 4,
+                totalExercises: 18,
+            },
+        ]);
+    });
     
 })

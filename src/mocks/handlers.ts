@@ -44,4 +44,44 @@ export const handlers = [
             { status: 404 }
         );
     }),
+
+    http.get(`${BASE_URL}/api/plan/history`, ({ request }) => {
+        const url = new URL(request.url);
+        const userId = url.searchParams.get('userId');
+
+        if (userId === 'user-123') {
+            return HttpResponse.json([
+                {
+                    id: 'plan-2',
+                    userId: 'user-123',
+                    version: 2,
+                    createdAt: '2026-03-12T09:30:00.000Z',
+                    overview: {
+                        goal: 'Build Muscle',
+                        frequency: '4 days per week',
+                        split: 'upper_lower',
+                        notes: 'Focus on progressive overload.',
+                    },
+                    workoutDays: 4,
+                    totalExercises: 20,
+                },
+                {
+                    id: 'plan-1',
+                    userId: 'user-123',
+                    version: 1,
+                    createdAt: '2026-03-10T09:30:00.000Z',
+                    overview: {
+                        goal: 'Build Muscle',
+                        frequency: '4 days per week',
+                        split: 'full_body',
+                        notes: 'Start with fundamentals.',
+                    },
+                    workoutDays: 4,
+                    totalExercises: 18,
+                },
+            ]);
+        }
+
+        return HttpResponse.json([]);
+    }),
 ]
