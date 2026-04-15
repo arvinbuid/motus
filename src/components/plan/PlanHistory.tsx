@@ -112,8 +112,8 @@ export default function PlanHistory({
                     </div>
                   </div>
 
-                  <div className="mt-3 md:mt-0">
-                    <p className="font-medium">
+                  <div className="mt-3 md:mt-0 md:max-w-sm text-left md:text-right">
+                    <p className="font-medium mb-1">
                       {plan.overview?.goal || "Personalized training plan"}
                     </p>
                     <p className="text-sm text-muted">
