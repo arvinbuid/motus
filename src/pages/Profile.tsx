@@ -1,16 +1,18 @@
+import { useEffect, useRef, useState } from "react";
 import { Navigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { useCurrentPlan } from "../hooks/useCurrentPlan";
 import { usePlanHistory } from "../hooks/usePlanHistory";
+import { useTrainingPlan } from "../hooks/useTrainingPlan";
 import { useGenerateTrainingPlan } from "../hooks/useMutations";
 import { Button } from "../components/ui/Button";
-import { Calendar, DownloadIcon, Dumbbell, Loader2, RefreshCcw, Target, TrendingUp } from "lucide-react";
+import { ArrowLeftCircle, Calendar, DownloadIcon, Dumbbell, EyeIcon, Loader2, RefreshCcw, Target, TrendingUp } from "lucide-react";
 import { Card } from "../components/ui/Card";
 import PlanDisplay from "../components/plan/PlanDisplay";
 import PlanHistory from "../components/plan/PlanHistory";
 import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Font } from '@react-pdf/renderer';
 import type { TrainingPlan } from "../types";
-import { formatSplitType } from "../lib/utils";
+import { formatDate, formatSplitType } from "../lib/utils";
 
 // Register fonts
 Font.register({
@@ -58,13 +60,37 @@ const TrainingPlanPDF = ({ plan }: { plan: TrainingPlan }) => (
 
 const Profile = () => {
     const { user, isLoading } = useAuth();
+    const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
     const { data: plan, isLoading: isPlanLoading, error: planError } = useCurrentPlan();
     const { data: planHistory = [], isLoading: isPlanHistoryLoading, error: planHistoryError } = usePlanHistory();
+    const {
+        data: selectedPlan,
+        isLoading: isSelectedPlanLoading,
+        error: selectedPlanError,
+    } = useTrainingPlan(selectedPlanId);
     const generateTrainingPlan = useGenerateTrainingPlan();
+    const profileDivRef = useRef<HTMLDivElement>(null);
+
+    // Scroll to top of page when selecting older plan version
+    useEffect(() => {
+        if (!plan || !selectedPlanId || isSelectedPlanLoading || !selectedPlan) {
+            return;
+        }
+
+        profileDivRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+        });
+    }, [plan, selectedPlanId, isSelectedPlanLoading, selectedPlan]);
 
     if (!user && !isLoading) {
         return <Navigate to='/auth/sign-in' replace />;
     }
+
+    if (!plan) {
+        return <Navigate to='/onboarding' replace />
+    }
+
 
     if (isLoading || (user && isPlanLoading)) {
         return (
@@ -95,57 +121,93 @@ const Profile = () => {
         );
     }
 
-    if (!plan) {
-        return <Navigate to='/onboarding' replace />
-    }
+    const displayPlan = selectedPlan ?? plan;
+    const isViewingPastVersion = !!selectedPlanId && displayPlan.id !== plan.id;
 
-    function formatDate(dateString: string) {
-        return new Date(dateString).toLocaleDateString('en-PH', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
+    const handleSelectPlan = (planId: string) => {
+        if (planId === plan.id) {
+            setSelectedPlanId(null);
+            return;
+        }
+        setSelectedPlanId(planId);
+    };
 
     return (
-        <div className="min-h-screen pt-24 pb-12 px-6">
+        <div className="min-h-screen scroll-mt-24 pt-24 pb-12 px-6" ref={profileDivRef}>
             <div className="max-w-4xl mx-auto">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div className="flex flex-col justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold mb-1">Your Training Plan</h1>
-                        <p className="text-muted">
-                            Version {plan.version} • Created {formatDate(plan.createdAt)}
+                        <h1 className='text-3xl font-bold mb-1'>
+                            {isViewingPastVersion ? "Viewing Saved Plan Version" : "Your Current Training Plan"}
+                        </h1>
+                        <p className="text-muted flex items-center gap-2">
+                            Version {displayPlan.version} • Created {formatDate(displayPlan.createdAt)}
+                            {isViewingPastVersion && <EyeIcon className="w-5 h-5" />}
                         </p>
                     </div>
 
                     <div className="flex flex-col md:flex-row gap-3 mt-2 md:mt-0">
                         {/* Download PDF Button */}
                         <PDFDownloadLink
-                            document={<TrainingPlanPDF plan={plan} />}
-                            fileName={`Training Plan v${plan.version}.pdf`}
+                            document={<TrainingPlanPDF plan={displayPlan} />}
+                            fileName={`Training Plan v${displayPlan.version}.pdf`}
                         >
                             {({ loading }) => (
                                 <Button
-                                    className="gap-2 w-full"
+                                    className="gap-2 w-full text-sm"
                                     variant="secondary"
+                                    disabled={isViewingPastVersion}
                                 >
                                     <DownloadIcon className="w-4 h-4" />
                                     {loading ? 'Preparing PDF...' : 'Download PDF'}
                                 </Button>
                             )}
                         </PDFDownloadLink>
+
+                        {/* Regenerate New Training Plan Button */}
                         <Button
-                            className="gap-2"
+                            className="gap-2 text-sm"
                             onClick={async () => await generateTrainingPlan.mutateAsync()}
-                            disabled={generateTrainingPlan.isPending}
+                            disabled={generateTrainingPlan.isPending || isViewingPastVersion}
                         >
                             <RefreshCcw className={`w-4 h-4 ${generateTrainingPlan.isPending ? 'animate-spin' : ''}`} />
                             {generateTrainingPlan.isPending ? 'Regenerating...' : 'Regenerate Plan'}
                         </Button>
+
+                        {/* Back to Latest Plan Button */}
+                        {isViewingPastVersion && (
+                            <Button
+                                className="gap-2 text-sm"
+                                variant="ghost"
+                                onClick={() => setSelectedPlanId(null)}
+                            >
+                                <ArrowLeftCircle />
+                                Back to Latest Plan
+                            </Button>
+                        )}
                     </div>
                 </div>
+
+                {selectedPlanId && isSelectedPlanLoading ? (
+                    <Card variant="bordered" className="mb-8 py-6">
+                        <div className="flex items-center gap-3">
+                            <Loader2 className="w-5 h-5 text-accent animate-spin" />
+                            <p className="text-sm text-muted">Loading selected plan version...</p>
+                        </div>
+                    </Card>
+                ) : null}
+
+                {selectedPlanId && selectedPlanError ? (
+                    <Card variant="bordered" className="mb-8">
+                        <h2 className="font-semibold text-lg mb-2">Unable to load selected version</h2>
+                        <p className="text-muted text-sm mb-4">
+                            {selectedPlanError instanceof Error ? selectedPlanError.message : "Something went wrong while loading that saved plan."}
+                        </p>
+                        <Button type="button" variant="secondary" onClick={() => setSelectedPlanId(null)}>
+                            Back to Latest Plan
+                        </Button>
+                    </Card>
+                ) : null}
 
                 {/* Plan Overview Cards */}
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -155,7 +217,7 @@ const Profile = () => {
                         </div>
                         <div className="space-y-1">
                             <p className="text-xs text-accent">Goal</p>
-                            <p className="font-medium text-sm">{plan.overview.goal}</p>
+                            <p className="font-medium text-sm">{displayPlan.overview.goal}</p>
                         </div>
                     </Card>
                     <Card variant="bordered" className="flex items-center gap-3">
@@ -164,7 +226,7 @@ const Profile = () => {
                         </div>
                         <div>
                             <p className="text-xs text-muted">Frequency</p>
-                            <p className="font-medium text-sm">{plan.overview.frequency}</p>
+                            <p className="font-medium text-sm">{displayPlan.overview.frequency}</p>
                         </div>
                     </Card>
                     <Card variant="bordered" className="flex items-center gap-3">
@@ -173,7 +235,7 @@ const Profile = () => {
                         </div>
                         <div>
                             <p className="text-xs text-muted">Split</p>
-                            <p className="font-medium text-sm">{formatSplitType(plan.overview.split)}</p>
+                            <p className="font-medium text-sm">{formatSplitType(displayPlan.overview.split)}</p>
                         </div>
                     </Card>
                     <Card variant="bordered" className="flex items-center gap-3">
@@ -181,8 +243,8 @@ const Profile = () => {
                             <TrendingUp className="w-5 h-5 text-accent" />
                         </div>
                         <div>
-                            <p className="text-xs text-muted">Version</p>
-                            <p className="font-medium text-sm">{plan.version}</p>
+                            <p className="text-xs text-muted">{isViewingPastVersion ? "Viewing" : "Version"}</p>
+                            <p className="font-medium text-sm">{displayPlan.version}</p>
                         </div>
                     </Card>
                 </div>
@@ -191,7 +253,7 @@ const Profile = () => {
                 <Card variant="bordered" className="mb-8">
                     <h2 className="font-semibold text-lg mb-2">Program Notes</h2>
                     <p className="text-muted text-sm leading-relaxed">
-                        {plan.overview.notes}
+                        {displayPlan.overview.notes}
                     </p>
                 </Card>
 
@@ -199,19 +261,21 @@ const Profile = () => {
                 <h2 className="font-semibold text-xl mb-4">Weekly Schedule</h2>
 
                 {/* Plan Display */}
-                <PlanDisplay weeklySchedule={plan.weeklySchedule} />
+                <PlanDisplay weeklySchedule={displayPlan.weeklySchedule} />
 
                 {/* Progression Strategy */}
                 <Card variant="bordered" className="mb-8">
                     <h2 className="font-semibold text-lg mb-2">Progression Strategy</h2>
                     <p className="text-muted text-sm leading-relaxed">
-                        {plan.progression}
+                        {displayPlan.progression}
                     </p>
                 </Card>
 
                 <PlanHistory
                     entries={planHistory}
                     currentPlanId={plan.id}
+                    selectedPlanId={selectedPlanId}
+                    onSelectPlan={handleSelectPlan}
                     isLoading={isPlanHistoryLoading}
                     error={planHistoryError instanceof Error ? planHistoryError : null}
                 />

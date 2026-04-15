@@ -1,49 +1,9 @@
 import {Router, type Request, type Response} from "express";
 import {prisma} from "../lib/prisma.js";
 import {generateTrainingPlan} from "../lib/ai.js";
+import {serializePlanHistoryEntry, serializeTrainingPlan} from "../lib/utils.js";
 
 const planRouter = Router();
-
-function serializeTrainingPlan(plan: {
-  id: string;
-  user_id: string;
-  plan_json: any;
-  plan_text: string;
-  version: number;
-  created_at: Date;
-}) {
-  return {
-    id: plan.id,
-    userId: plan.user_id,
-    planJson: plan.plan_json,
-    planText: plan.plan_text,
-    version: plan.version,
-    createdAt: plan.created_at,
-  };
-}
-
-function serializePlanHistoryEntry(plan: {
-  id: string;
-  user_id: string;
-  plan_json: any;
-  version: number;
-  created_at: Date;
-}) {
-  const weeklySchedule = Array.isArray(plan.plan_json?.weeklySchedule) ? plan.plan_json.weeklySchedule : [];
-
-  return {
-    id: plan.id,
-    userId: plan.user_id,
-    version: plan.version,
-    createdAt: plan.created_at,
-    overview: plan.plan_json?.overview ?? null,
-    workoutDays: weeklySchedule.length,
-    totalExercises: weeklySchedule.reduce((total: number, day: any) => {
-      const exercises = Array.isArray(day?.exercises) ? day.exercises.length : 0;
-      return total + exercises;
-    }, 0),
-  };
-}
 
 planRouter.get("/current", async (req: Request, res: Response) => {
   try {
@@ -86,6 +46,38 @@ planRouter.get("/history", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error fetching plan history:", error);
     res.status(500).json({error: "Failed to fetch plan history"});
+  }
+});
+
+planRouter.get("/:planId", async (req: Request, res: Response) => {
+  try {
+    const userId = req.query.userId as string;
+    const planIdParam = req.params.planId;
+    const planId = Array.isArray(planIdParam) ? planIdParam[0] : planIdParam;
+
+    if (!userId) {
+      return res.status(400).json({error: "User ID is required"});
+    }
+
+    if (!planId) {
+      return res.status(400).json({error: "Plan ID is required"});
+    }
+
+    const plan = await prisma.training_plans.findFirst({
+      where: {
+        id: planId,
+        user_id: userId,
+      },
+    });
+
+    if (!plan) {
+      return res.status(404).json({error: "Plan not found"});
+    }
+
+    res.json(serializeTrainingPlan(plan));
+  } catch (error) {
+    console.error("Error fetching previous plan:", error);
+    res.status(500).json({error: "Failed to fetch plan"});
   }
 });
 

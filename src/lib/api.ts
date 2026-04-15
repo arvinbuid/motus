@@ -87,6 +87,10 @@ export const api = {
     const planData = await get(`/plan/current?userId=${userId}`);
     return mapTrainingPlan(planData);
   },
+  async getTrainingPlan(userId: string, planId: string): Promise<TrainingPlan> {
+    const planData = await get(`/plan/${planId}?userId=${userId}`);
+    return mapTrainingPlan(planData);
+  },
   async getPlanHistory(userId: string): Promise<PlanHistoryEntry[]> {
     const planHistoryData = await get(`/plan/history?userId=${userId}`);
     return Array.isArray(planHistoryData) ? planHistoryData.map(mapPlanHistoryEntry) : [];

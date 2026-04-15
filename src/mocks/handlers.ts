@@ -84,4 +84,43 @@ export const handlers = [
 
         return HttpResponse.json([]);
     }),
+
+    http.get(`${BASE_URL}/api/plan/:planId`, ({ params, request }) => {
+        const url = new URL(request.url);
+        const userId = url.searchParams.get('userId');
+        const { planId } = params;
+
+        if (userId === 'user-123' && planId === 'plan-1') {
+            return HttpResponse.json({
+                id: 'plan-1',
+                userId: 'user-123',
+                version: 1,
+                createdAt: '2026-03-10T09:30:00.000Z',
+                planJson: {
+                    overview: {
+                        goal: 'Build Muscle',
+                        frequency: '4 days per week',
+                        split: 'full_body',
+                        notes: 'Start with fundamentals.',
+                    },
+                    weeklySchedule: [
+                        {
+                            day: 'Monday',
+                            focus: 'Full Body A',
+                            exercises: [
+                                { name: 'Goblet Squat', sets: 3, reps: '8-10', rest: '90 sec', rpe: 7 },
+                                { name: 'Dumbbell Bench Press', sets: 3, reps: '8-12', rest: '90 sec', rpe: 7 },
+                            ],
+                        },
+                    ],
+                    progression: 'Add reps before adding load, then increase weight gradually.',
+                },
+            });
+        }
+
+        return HttpResponse.json(
+            { error: 'Plan not found' },
+            { status: 404 }
+        );
+    }),
 ]

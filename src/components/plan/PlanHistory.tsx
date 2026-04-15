@@ -1,11 +1,14 @@
 import { Clock3, GitBranch, History, Sparkles } from "lucide-react";
 import type { PlanHistoryEntry } from "../../types";
 import { Card } from "../ui/Card";
-import { formatDate, formatSplitType } from "../../lib/utils";
+import { cn, formatDate, formatSplitType } from "../../lib/utils";
+import { Button } from "../ui/Button";
 
 interface PlanHistoryProps {
   entries: PlanHistoryEntry[];
   currentPlanId: string;
+  selectedPlanId?: string | null;
+  onSelectPlan?: (planId: string) => void;
   isLoading?: boolean;
   error?: Error | null;
 }
@@ -13,6 +16,8 @@ interface PlanHistoryProps {
 export default function PlanHistory({
   entries,
   currentPlanId,
+  selectedPlanId = null,
+  onSelectPlan,
   isLoading = false,
   error = null,
 }: PlanHistoryProps) {
@@ -73,26 +78,42 @@ export default function PlanHistory({
 
         {recentGeneratedPlans.map((plan) => {
           const isCurrentPlan = plan.id === currentPlanId;
+          const isViewingThisPlan = selectedPlanId ? plan.id === selectedPlanId : isCurrentPlan;
+          const buttonLabel = isViewingThisPlan
+            ? isCurrentPlan
+              ? "Viewing Latest"
+              : "Viewing"
+            : isCurrentPlan
+              ? "View Latest"
+              : "View Version";
 
           return (
             <div
               key={plan.id}
-              className="rounded-md border border-border bg-background/60 p-4"
+              className={cn(
+                "rounded-md border border-border bg-background/60 p-4 transition-colors",
+                isViewingThisPlan ? "border-accent/50 bg-card" : "",
+              )}
             >
 
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-semibold uppercase tracking-wide">
-                    Version {plan.version}
-                  </span>
-                  {isCurrentPlan ? (
-                    <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-black">
-                      Current
+              <div className="flex flex-col gap-4 md:flex-row md:justify-between">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold uppercase tracking-wide">
+                      Version {plan.version}
                     </span>
-                  ) : null}
-                </div>
+                    {isCurrentPlan ? (
+                      <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-black">
+                        Current
+                      </span>
+                    ) : null}
+                    {isViewingThisPlan && !isCurrentPlan ? (
+                      <span className="rounded-full border border-accent/40 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-accent">
+                        Viewing
+                      </span>
+                    ) : null}
+                  </div>
 
-                <div className="flex flex-col md:flex-row md:justify-between">
                   <div className="flex flex-col md:flex-row text-md text-muted">
                     <div>
                       <div className="flex items-center gap-2">
@@ -112,7 +133,7 @@ export default function PlanHistory({
                     </div>
                   </div>
 
-                  <div className="mt-3 md:mt-0 md:max-w-sm text-left md:text-right">
+                  <div>
                     <p className="font-medium mb-1">
                       {plan.overview?.goal || "Personalized training plan"}
                     </p>
@@ -120,6 +141,19 @@ export default function PlanHistory({
                       {plan.overview?.frequency || "Custom training frequency"}
                     </p>
                   </div>
+                </div>
+
+                <div className="md:self-start">
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="whitespace-nowrap"
+                    variant={isViewingThisPlan ? "ghost" : "secondary"}
+                    disabled={isViewingThisPlan}
+                    onClick={() => onSelectPlan?.(plan.id)}
+                  >
+                    {buttonLabel}
+                  </Button>
                 </div>
               </div>
             </div>
