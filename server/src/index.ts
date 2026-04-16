@@ -7,6 +7,7 @@ import {requireAuth} from "./middleware/auth.js";
 import profileRouter from "./routes/profile.js";
 import planRouter from "./routes/plan.js";
 import {rateLimit} from "express-rate-limit";
+import helmet from "helmet";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -20,6 +21,7 @@ const limiter = rateLimit({
   message: "Too many requests, please try again later.",
 });
 
+app.use(helmet());
 app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
