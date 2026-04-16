@@ -8,6 +8,7 @@ import profileRouter from "./routes/profile.js";
 import planRouter from "./routes/plan.js";
 import {rateLimit} from "express-rate-limit";
 import helmet from "helmet";
+import morgan from "morgan";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -26,6 +27,7 @@ app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
 app.use(limiter);
+app.use(morgan("dev"));
 
 app.get("/", (req, res) => res.send("Server is live..."));
 
