@@ -6,13 +6,24 @@ import "dotenv/config";
 import {requireAuth} from "./middleware/auth.js";
 import profileRouter from "./routes/profile.js";
 import planRouter from "./routes/plan.js";
+import {rateLimit} from "express-rate-limit";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  limit: 100,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  ipv6Subnet: 56,
+  message: "Too many requests, please try again later.",
+});
+
 app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
+app.use(limiter);
 
 app.get("/", (req, res) => res.send("Server is live..."));
 
