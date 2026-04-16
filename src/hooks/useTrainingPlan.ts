@@ -11,7 +11,7 @@ export function trainingPlanOptions(userId?: string, planId?: string | null) {
         return null;
       }
 
-      return api.getTrainingPlan(userId, planId);
+      return api.getTrainingPlan(planId);
     },
     retry: (failureCount: number, error: Error) => {
       if (error instanceof ApiError && error.status === 404) {

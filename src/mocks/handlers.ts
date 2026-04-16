@@ -21,76 +21,57 @@ export const handlers = [
         return new HttpResponse(null, { status: 500 });
     }),
 
-    http.get(`${BASE_URL}/api/profile`, ({ request }) => {
-        const url = new URL(request.url);
-        const userId = url.searchParams.get('userId');
+    http.get(`${BASE_URL}/api/profile`, () => {
+        return HttpResponse.json({
+            userId: 'user-123',
+            goal: 'bulk',
+            experience: 'intermediate',
+            daysPerWeek: 4,
+            sessionLength: 60,
+            equipment: 'full_gym',
+            injuries: 'None',
+            preferredSplit: 'upper_lower',
+            updatedAt: '2026-03-10T10:00:00.000Z',
+        });
+    }),
 
-        if (userId === 'user-123') {
-            return HttpResponse.json({
+    http.get(`${BASE_URL}/api/plan/history`, () => {
+        return HttpResponse.json([
+            {
+                id: 'plan-2',
                 userId: 'user-123',
-                goal: 'bulk',
-                experience: 'intermediate',
-                daysPerWeek: 4,
-                sessionLength: 60,
-                equipment: 'full_gym',
-                injuries: 'None',
-                preferredSplit: 'upper_lower',
-                updatedAt: '2026-03-10T10:00:00.000Z',
-            });
-        }
-
-        return HttpResponse.json(
-            { error: 'Profile not found' },
-            { status: 404 }
-        );
+                version: 2,
+                createdAt: '2026-03-12T09:30:00.000Z',
+                overview: {
+                    goal: 'Build Muscle',
+                    frequency: '4 days per week',
+                    split: 'upper_lower',
+                    notes: 'Focus on progressive overload.',
+                },
+                workoutDays: 4,
+                totalExercises: 20,
+            },
+            {
+                id: 'plan-1',
+                userId: 'user-123',
+                version: 1,
+                createdAt: '2026-03-10T09:30:00.000Z',
+                overview: {
+                    goal: 'Build Muscle',
+                    frequency: '4 days per week',
+                    split: 'full_body',
+                    notes: 'Start with fundamentals.',
+                },
+                workoutDays: 4,
+                totalExercises: 18,
+            },
+        ]);
     }),
 
-    http.get(`${BASE_URL}/api/plan/history`, ({ request }) => {
-        const url = new URL(request.url);
-        const userId = url.searchParams.get('userId');
-
-        if (userId === 'user-123') {
-            return HttpResponse.json([
-                {
-                    id: 'plan-2',
-                    userId: 'user-123',
-                    version: 2,
-                    createdAt: '2026-03-12T09:30:00.000Z',
-                    overview: {
-                        goal: 'Build Muscle',
-                        frequency: '4 days per week',
-                        split: 'upper_lower',
-                        notes: 'Focus on progressive overload.',
-                    },
-                    workoutDays: 4,
-                    totalExercises: 20,
-                },
-                {
-                    id: 'plan-1',
-                    userId: 'user-123',
-                    version: 1,
-                    createdAt: '2026-03-10T09:30:00.000Z',
-                    overview: {
-                        goal: 'Build Muscle',
-                        frequency: '4 days per week',
-                        split: 'full_body',
-                        notes: 'Start with fundamentals.',
-                    },
-                    workoutDays: 4,
-                    totalExercises: 18,
-                },
-            ]);
-        }
-
-        return HttpResponse.json([]);
-    }),
-
-    http.get(`${BASE_URL}/api/plan/:planId`, ({ params, request }) => {
-        const url = new URL(request.url);
-        const userId = url.searchParams.get('userId');
+    http.get(`${BASE_URL}/api/plan/:planId`, ({ params }) => {
         const { planId } = params;
 
-        if (userId === 'user-123' && planId === 'plan-1') {
+        if (planId === 'plan-1') {
             return HttpResponse.json({
                 id: 'plan-1',
                 userId: 'user-123',

@@ -12,7 +12,7 @@ export function currentPlanOptions(userId?: string) {
       }
 
       try {
-        return await api.getCurrentPlan(userId);
+        return await api.getCurrentPlan();
       } catch (error) {
         if (error instanceof ApiError && error.status === 404) {
           return null;

@@ -12,7 +12,7 @@ export function currentProfileOptions(userId?: string) {
       }
 
       try {
-        return await api.getProfile(userId);
+        return await api.getProfile();
       } catch (error) {
         if (error instanceof ApiError && error.status === 404) {
           return null;

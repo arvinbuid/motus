@@ -14,7 +14,7 @@ export function saveProfileMutationOptions(
   return mutationOptions({
     mutationKey: ["save-profile", userId],
     mutationFn: async (profileData: Omit<UserProfile, "userId" | "updatedAt">) => {
-      return api.saveProfile(userId, profileData);
+      return api.saveProfile(profileData);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({queryKey: currentProfileOptions(userId).queryKey});
@@ -29,7 +29,7 @@ export function generateTrainingPlanMutationOptions(
   return mutationOptions({
     mutationKey: ["generate-training-plan", userId],
     mutationFn: async () => {
-      return api.generatePlan(userId);
+      return api.generatePlan();
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({queryKey: currentPlanOptions(userId).queryKey});
@@ -54,7 +54,7 @@ export function useSaveProfile() {
         throw new Error("User must be authenticated to save profile");
       }
 
-      return api.saveProfile(user.id, profileData);
+      return api.saveProfile(profileData);
     },
     onError: (error) => {
       console.error(error);
@@ -74,7 +74,7 @@ export function useGenerateTrainingPlan() {
         throw new Error("User must be authenticated to generate training plan");
       }
 
-      return api.generatePlan(user.id);
+      return api.generatePlan();
     },
   });
 }

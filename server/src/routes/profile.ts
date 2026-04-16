@@ -5,10 +5,10 @@ const profileRouter = Router();
 
 profileRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const userId = req.query.userId as string;
+    const userId = req.auth.userId;
 
     if (!userId) {
-      return res.status(400).json({error: "User ID is required"});
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const profile = await prisma.user_profiles.findUnique({
@@ -38,10 +38,11 @@ profileRouter.get("/", async (req: Request, res: Response) => {
 
 profileRouter.post("/", async (req: Request, res: Response) => {
   try {
-    const {userId, ...profileData} = req.body;
+    const userId = req.auth.userId;
+    const profileData = req.body;
 
     if (!userId) {
-      return res.status(400).json({error: "User ID is required"});
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const {goal, experience, daysPerWeek, sessionLength, equipment, injuries, preferredSplit} =

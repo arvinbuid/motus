@@ -7,10 +7,10 @@ const planRouter = Router();
 
 planRouter.get("/current", async (req: Request, res: Response) => {
   try {
-    const userId = req.query.userId as string;
+    const userId = req.auth.userId;
 
     if (!userId) {
-      return res.status(400).json({error: "User ID is required"});
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const plan = await prisma.training_plans.findFirst({
@@ -31,10 +31,10 @@ planRouter.get("/current", async (req: Request, res: Response) => {
 
 planRouter.get("/history", async (req: Request, res: Response) => {
   try {
-    const userId = req.query.userId as string;
+    const userId = req.auth.userId;
 
     if (!userId) {
-      return res.status(400).json({error: "User ID is required"});
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const plans = await prisma.training_plans.findMany({
@@ -51,12 +51,12 @@ planRouter.get("/history", async (req: Request, res: Response) => {
 
 planRouter.get("/:planId", async (req: Request, res: Response) => {
   try {
-    const userId = req.query.userId as string;
+    const userId = req.auth.userId;
     const planIdParam = req.params.planId;
     const planId = Array.isArray(planIdParam) ? planIdParam[0] : planIdParam;
 
     if (!userId) {
-      return res.status(400).json({error: "User ID is required"});
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     if (!planId) {
@@ -83,10 +83,10 @@ planRouter.get("/:planId", async (req: Request, res: Response) => {
 
 planRouter.post("/generate", async (req: Request, res: Response) => {
   try {
-    const {userId} = req.body;
+    const userId = req.auth.userId;
 
     if (!userId) {
-      return res.status(400).json({error: "User ID is required"});
+      return res.status(401).json({error: "Unauthorized"});
     }
 
     const profile = await prisma.user_profiles.findUnique({

@@ -11,7 +11,7 @@ export function planHistoryOptions(userId?: string) {
         return [];
       }
 
-      return api.getPlanHistory(userId);
+      return api.getPlanHistory();
     },
     staleTime: 2 * 60 * 1000,
     gcTime: 2 * 60 * 1000,

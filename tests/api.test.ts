@@ -17,7 +17,7 @@ describe('get helper (msw)', () => {
     });
 
     it('maps profile payloads into the frontend shape', async () => {
-        const result = await api.getProfile('user-123');
+        const result = await api.getProfile();
 
         expect(result).toEqual({
             userId: 'user-123',
@@ -32,16 +32,16 @@ describe('get helper (msw)', () => {
         });
     });
 
-    it('preserves HTTP status in ApiError for profile requests', async () => {
-        await expect(api.getProfile('missing-user')).rejects.toMatchObject<ApiError>({
+    it('preserves HTTP status in ApiError for historical plan requests', async () => {
+        await expect(api.getTrainingPlan('missing-plan')).rejects.toMatchObject<ApiError>({
             name: 'ApiError',
             status: 404,
-            message: 'Profile not found',
+            message: 'Plan not found',
         });
     });
 
     it('maps plan history payloads into the frontend shape', async () => {
-        const result = await api.getPlanHistory('user-123');
+        const result = await api.getPlanHistory();
 
         expect(result).toEqual([
             {
@@ -76,7 +76,7 @@ describe('get helper (msw)', () => {
     });
 
     it('maps a historical training plan payload into the frontend shape', async () => {
-        const result = await api.getTrainingPlan('user-123', 'plan-1');
+        const result = await api.getTrainingPlan('plan-1');
 
         expect(result).toEqual({
             id: 'plan-1',

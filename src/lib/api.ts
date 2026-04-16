@@ -1,4 +1,5 @@
 import type {PlanHistoryEntry, TrainingPlan, UserProfile} from "../types";
+import {buildRequestHeaders, mapPlanHistoryEntry, mapTrainingPlan, mapUserProfile} from "./utils";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
@@ -14,7 +15,9 @@ export class ApiError extends Error {
 
 // Reusable helper functions
 export async function get(path: string) {
-  const res = await fetch(`${BASE_URL}/api${path}`);
+  const res = await fetch(`${BASE_URL}/api${path}`, {
+    headers: await buildRequestHeaders(),
+  });
   if (!res.ok) {
     throw new ApiError((await res.json().catch(() => ({}))).error || "Request failed", res.status);
   }
@@ -24,7 +27,7 @@ export async function get(path: string) {
 async function post(path: string, body: object) {
   const res = await fetch(`${BASE_URL}/api${path}`, {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: await buildRequestHeaders({"Content-Type": "application/json"}),
     body: JSON.stringify(body),
   });
 
@@ -34,65 +37,27 @@ async function post(path: string, body: object) {
   return res.json();
 }
 
-function mapTrainingPlan(planData: any): TrainingPlan {
-  return {
-    id: planData.id,
-    userId: planData.userId,
-    overview: planData.planJson.overview,
-    weeklySchedule: planData.planJson.weeklySchedule,
-    progression: planData.planJson.progression,
-    version: planData.version,
-    createdAt: planData.createdAt,
-  };
-}
-
-function mapUserProfile(profileData: any): UserProfile {
-  return {
-    userId: profileData.userId,
-    goal: profileData.goal,
-    experience: profileData.experience,
-    daysPerWeek: profileData.daysPerWeek,
-    sessionLength: profileData.sessionLength,
-    equipment: profileData.equipment,
-    injuries: profileData.injuries ?? undefined,
-    preferredSplit: profileData.preferredSplit,
-    updatedAt: profileData.updatedAt,
-  };
-}
-
-function mapPlanHistoryEntry(planData: any): PlanHistoryEntry {
-  return {
-    id: planData.id,
-    userId: planData.userId,
-    version: planData.version,
-    createdAt: planData.createdAt,
-    overview: planData.overview ?? null,
-    workoutDays: planData.workoutDays ?? 0,
-    totalExercises: planData.totalExercises ?? 0,
-  };
-}
-
 export const api = {
-  async getProfile(userId: string): Promise<UserProfile> {
-    const profileData = await get(`/profile?userId=${userId}`);
+  async getProfile(): Promise<UserProfile> {
+    const profileData = await get("/profile");
     return mapUserProfile(profileData);
   },
-  saveProfile: (userId: string, profileData: Omit<UserProfile, "userId" | "updatedAt">) => {
-    return post("/profile", {userId, ...profileData});
+  saveProfile: (profileData: Omit<UserProfile, "userId" | "updatedAt">) => {
+    return post("/profile", profileData);
   },
-  generatePlan: (userId: string) => {
-    return post("/plan/generate", {userId});
+  generatePlan: () => {
+    return post("/plan/generate", {});
   },
-  async getCurrentPlan(userId: string): Promise<TrainingPlan> {
-    const planData = await get(`/plan/current?userId=${userId}`);
+  async getCurrentPlan(): Promise<TrainingPlan> {
+    const planData = await get("/plan/current");
     return mapTrainingPlan(planData);
   },
-  async getTrainingPlan(userId: string, planId: string): Promise<TrainingPlan> {
-    const planData = await get(`/plan/${planId}?userId=${userId}`);
+  async getTrainingPlan(planId: string): Promise<TrainingPlan> {
+    const planData = await get(`/plan/${planId}`);
     return mapTrainingPlan(planData);
   },
-  async getPlanHistory(userId: string): Promise<PlanHistoryEntry[]> {
-    const planHistoryData = await get(`/plan/history?userId=${userId}`);
+  async getPlanHistory(): Promise<PlanHistoryEntry[]> {
+    const planHistoryData = await get("/plan/history");
     return Array.isArray(planHistoryData) ? planHistoryData.map(mapPlanHistoryEntry) : [];
   },
 };
