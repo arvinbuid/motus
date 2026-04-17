@@ -40,3 +40,12 @@ export interface TrainingPlan {
   version: number;
   createdAt: string;
 }
+
+export interface PlanJSON {
+  overview: PlanOverview;
+  progression: string;
+  weeklySchedule: DaySchedule[];
+  planText: string;
+  version: number;
+  createdAt: string;
+}

@@ -35,19 +35,19 @@ export async function buildRequestHeaders(headers: HeadersInit = {}) {
   };
 }
 
-export function mapTrainingPlan(planData: any): TrainingPlan {
+export function mapTrainingPlan(planData: TrainingPlan): TrainingPlan {
   return {
     id: planData.id,
     userId: planData.userId,
-    overview: planData.planJson.overview,
-    weeklySchedule: planData.planJson.weeklySchedule,
-    progression: planData.planJson.progression,
+    overview: planData.overview,
+    weeklySchedule: planData.weeklySchedule,
+    progression: planData.progression,
     version: planData.version,
     createdAt: planData.createdAt,
   };
 }
 
-export function mapUserProfile(profileData: any): UserProfile {
+export function mapUserProfile(profileData: UserProfile): UserProfile {
   return {
     userId: profileData.userId,
     goal: profileData.goal,
@@ -61,7 +61,7 @@ export function mapUserProfile(profileData: any): UserProfile {
   };
 }
 
-export function mapPlanHistoryEntry(planData: any): PlanHistoryEntry {
+export function mapPlanHistoryEntry(planData: PlanHistoryEntry): PlanHistoryEntry {
   return {
     id: planData.id,
     userId: planData.userId,
