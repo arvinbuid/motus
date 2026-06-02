@@ -7,7 +7,7 @@ import {planHistoryOptions} from "./usePlanHistory";
 import {currentProfileOptions} from "./useCurrentProfile";
 import type {UserProfile} from "../types";
 
-export function saveProfileMutationOptions(
+function saveProfileMutationOptions(
   userId: string,
   queryClient: ReturnType<typeof useQueryClient>,
 ) {
@@ -22,7 +22,7 @@ export function saveProfileMutationOptions(
   });
 }
 
-export function generateTrainingPlanMutationOptions(
+function generateTrainingPlanMutationOptions(
   userId: string,
   queryClient: ReturnType<typeof useQueryClient>,
 ) {
