@@ -2,7 +2,7 @@ import {queryOptions, useQuery} from "@tanstack/react-query";
 import {useAuth} from "../context/AuthContext";
 import {api, ApiError} from "../lib/api";
 
-export function trainingPlanOptions(userId?: string, planId?: string | null) {
+function trainingPlanOptions(userId?: string, planId?: string | null) {
   return queryOptions({
     queryKey: ["training-plan", userId ?? "guest", planId ?? "current"],
     enabled: !!userId && !!planId,

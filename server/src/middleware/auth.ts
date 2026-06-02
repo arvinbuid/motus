@@ -31,7 +31,7 @@ function getBearerToken(request: Request) {
   return token;
 }
 
-export async function validateNeonToken(token: string) {
+async function validateNeonToken(token: string) {
   const {payload} = await jwtVerify(token, neonJwks, {
     issuer: issuerCandidates,
   });
