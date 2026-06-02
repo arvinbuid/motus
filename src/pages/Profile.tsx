@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Navigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { useCurrentPlan } from "../hooks/useCurrentPlan";
@@ -71,17 +71,24 @@ const Profile = () => {
     const generateTrainingPlan = useGenerateTrainingPlan();
     const profileDivRef = useRef<HTMLDivElement>(null);
 
+    // Wait one frame so React can commit plan view changes before scrolling.
+    const scrollToTop = useCallback(() => {
+        window.requestAnimationFrame(() => {
+            profileDivRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        });
+    }, []);
+
     // Scroll to top of page when selecting older plan version
     useEffect(() => {
         if (!plan || !selectedPlanId || isSelectedPlanLoading || !selectedPlan) {
             return;
         }
 
-        profileDivRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-        });
-    }, [plan, selectedPlanId, isSelectedPlanLoading, selectedPlan]);
+        scrollToTop();
+    }, [plan, selectedPlanId, isSelectedPlanLoading, selectedPlan, scrollToTop]);
 
     if (!user && !isLoading) {
         return <Navigate to='/auth/sign-in' replace />;
@@ -90,7 +97,6 @@ const Profile = () => {
     if (!plan) {
         return <Navigate to='/onboarding' replace />
     }
-
 
     if (isLoading || (user && isPlanLoading)) {
         return (
@@ -127,6 +133,7 @@ const Profile = () => {
     const handleSelectPlan = (planId: string) => {
         if (planId === plan.id) {
             setSelectedPlanId(null);
+            scrollToTop();
             return;
         }
         setSelectedPlanId(planId);
@@ -179,7 +186,10 @@ const Profile = () => {
                             <Button
                                 className="gap-2 text-sm"
                                 variant="ghost"
-                                onClick={() => setSelectedPlanId(null)}
+                                onClick={() => {
+                                    setSelectedPlanId(null);
+                                    scrollToTop();
+                                }}
                             >
                                 <ArrowLeftCircle />
                                 Back to Latest Plan
