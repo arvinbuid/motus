@@ -12,7 +12,7 @@ import PlanDisplay from "../components/plan/PlanDisplay";
 import PlanHistory from "../components/plan/PlanHistory";
 import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Font } from '@react-pdf/renderer';
 import type { TrainingPlan } from "../types";
-import { formatDate, formatSplitType } from "../lib/utils";
+import { formatDate, formatGoalPreview, formatSplitType } from "../lib/utils";
 
 // Register fonts
 Font.register({
@@ -129,6 +129,7 @@ const Profile = () => {
 
     const displayPlan = selectedPlan ?? plan;
     const isViewingPastVersion = !!selectedPlanId && displayPlan.id !== plan.id;
+    const displayPlanGoal = formatGoalPreview(displayPlan.overview.goal);
 
     const handleSelectPlan = (planId: string) => {
         if (planId === plan.id) {
@@ -227,7 +228,7 @@ const Profile = () => {
                         </div>
                         <div className="space-y-1">
                             <p className="text-xs text-accent">Goal</p>
-                            <p className="font-medium text-sm">{displayPlan.overview.goal}</p>
+                            <p className="font-medium text-sm">{displayPlanGoal}</p>
                         </div>
                     </Card>
                     <Card variant="bordered" className="flex items-center gap-3">
@@ -277,7 +278,7 @@ const Profile = () => {
                 <Card variant="bordered" className="mb-8">
                     <h2 className="font-semibold text-lg mb-2">Progression Strategy</h2>
                     <p className="text-muted text-sm leading-relaxed">
-                        {displayPlan.progression}
+                        {displayPlan.progression || "No progression strategy provided."}
                     </p>
                 </Card>
 

@@ -35,6 +35,22 @@ export async function buildRequestHeaders(headers: HeadersInit = {}) {
   };
 }
 
+export const formatGoalPreview = (goal: string) => {
+  const longGoalLength = 120;
+
+  if (goal.length <= longGoalLength) {
+    return goal;
+  }
+
+  const firstEndOfSentence = goal.indexOf(".");
+
+  if (firstEndOfSentence === -1) {
+    return goal;
+  }
+
+  return goal.slice(0, firstEndOfSentence + 1);
+};
+
 export function mapTrainingPlan(planData: TrainingPlan): TrainingPlan {
   return {
     id: planData.id,
