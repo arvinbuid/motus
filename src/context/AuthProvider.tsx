@@ -1,9 +1,10 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { authClient } from "../lib/auth";
+import type { User } from "../types";
 import { AuthContext } from "./AuthContext";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [neonUser, setNeonUser] = useState<any>(null);
+    const [neonUser, setNeonUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     // Load Neon User
@@ -11,8 +12,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         async function loadUser() {
             try {
                 const res = await authClient.getSession();
-                if (res && res.data?.user) {
-                    setNeonUser(res.data.user);
+                const userSession = res?.data?.user;
+
+                if (userSession) {
+                    setNeonUser({
+                        id: userSession.id,
+                        name: userSession.name,
+                        email: userSession.email,
+                    });
                 } else {
                     setNeonUser(null);
                 }

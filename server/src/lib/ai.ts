@@ -1,20 +1,22 @@
 import OpenAI from "openai";
 import "dotenv/config";
 
-import {TrainingPlan, UserProfile} from "../../types/index.js";
+import type {Exercise, TrainingPlan, UserProfile} from "../../types/index.js";
+
+type GeneratedTrainingPlan = Omit<TrainingPlan, "id" | "userId" | "version" | "createdAt">;
 
 export const generateTrainingPlan = async (
-  profile: UserProfile | Record<string, any>,
-): Promise<Omit<TrainingPlan, "id" | "userId" | "version" | "createdAt">> => {
+  profile: Partial<UserProfile>,
+): Promise<GeneratedTrainingPlan> => {
   // Normalize profile data
   const normalizedProfile: UserProfile = {
-    goal: profile.goal || "bulk",
-    experience: profile.experience || "intermediate",
-    days_per_week: profile.days_per_week || 4,
-    session_length: profile.session_length || 60,
-    equipment: profile.equipment || "full_gym",
-    injuries: profile.injuries || null,
-    preferred_split: profile.preferred_split || "upper_lower",
+    goal: profile.goal ?? "bulk",
+    experience: profile.experience ?? "intermediate",
+    days_per_week: profile.days_per_week ?? 4,
+    session_length: profile.session_length ?? 60,
+    equipment: profile.equipment ?? "full_gym",
+    injuries: profile.injuries ?? null,
+    preferred_split: profile.preferred_split ?? "upper_lower",
   };
 
   const apiKey = process.env.OPEN_ROUTER_KEY;
@@ -60,7 +62,7 @@ export const generateTrainingPlan = async (
       throw new Error("No content in AI response");
     }
 
-    const planData = JSON.parse(content);
+    const planData = JSON.parse(content) as unknown;
 
     return formatPlanResponse(planData, normalizedProfile);
   } catch (error) {
@@ -70,34 +72,71 @@ export const generateTrainingPlan = async (
 };
 
 function formatPlanResponse(
-  aiResponse: any,
+  aiResponse: unknown,
   profile: UserProfile,
-): Omit<TrainingPlan, "id" | "userId" | "version" | "createdAt"> {
-  const plan: Omit<TrainingPlan, "id" | "userId" | "version" | "createdAt"> = {
+): GeneratedTrainingPlan {
+  const response = isRecord(aiResponse) ? aiResponse : {};
+  const overview = isRecord(response.overview) ? response.overview : {};
+
+  const plan: GeneratedTrainingPlan = {
     overview: {
-      goal: aiResponse.overview?.goal || `Customized ${profile.goal} program`,
-      frequency: aiResponse.overview?.frequency || `${profile.days_per_week} days per week`,
-      split: aiResponse.overview?.split || profile.preferred_split,
-      notes: aiResponse.overview?.notes || "Follow the program consistently for best results.",
+      goal: getString(overview.goal, `Customized ${profile.goal} program`),
+      frequency: getString(overview.frequency, `${profile.days_per_week} days per week`),
+      split: getString(overview.split, profile.preferred_split),
+      notes: getString(overview.notes, "Follow the program consistently for best results."),
     },
-    weeklySchedule: (aiResponse.weeklySchedule || []).map((day: any) => ({
-      day: day.day || "Day",
-      focus: day.focus || "Focus",
-      exercises: (day.exercises || []).map((ex: any) => ({
-        name: ex.name || "Exercise",
-        sets: ex.sets || 3,
-        reps: ex.reps || "8-12",
-        rest: ex.rest || "60-90 sec",
-        rpe: ex.rpe || 7,
-        notes: ex.notes,
-        alternatives: ex.alternatives,
-      })),
+    weeklySchedule: getRecords(response.weeklySchedule).map((day) => ({
+      day: getString(day.day, "Day"),
+      focus: getString(day.focus, "Focus"),
+      exercises: getRecords(day.exercises).map(formatExercise),
     })),
-    progression:
-      aiResponse.progression ||
+    progression: getString(
+      response.progression,
       "Increase weight by 2.5-5lbs when you can complete all sets with good form. Track your progress weekly.",
+    ),
   };
   return plan;
+}
+
+function formatExercise(exercise: Record<string, unknown>): Exercise {
+  return {
+    name: getString(exercise.name, "Exercise"),
+    sets: getNumber(exercise.sets, 3),
+    reps: getString(exercise.reps, "8-12"),
+    rest: getString(exercise.rest, "60-90 sec"),
+    rpe: getNumber(exercise.rpe, 7),
+    notes: getOptionalString(exercise.notes),
+    alternatives: getStringArray(exercise.alternatives),
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function getRecords(value: unknown): Record<string, unknown>[] {
+  return Array.isArray(value) ? value.filter(isRecord) : [];
+}
+
+function getString(value: unknown, fallback: string): string {
+  return typeof value === "string" && value.trim().length > 0 ? value : fallback;
+}
+
+function getOptionalString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+}
+
+function getNumber(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function getStringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const strings = value.filter((item): item is string => typeof item === "string");
+  return strings.length > 0 ? strings : undefined;
 }
 
 function buildPrompt(profile: UserProfile): string {

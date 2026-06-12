@@ -3,6 +3,13 @@ import {twMerge} from "tailwind-merge";
 import {getAuthToken} from "./auth";
 import type {PlanHistoryEntry, TrainingPlan, UserProfile} from "../types";
 
+type TrainingPlanDetails = Pick<TrainingPlan, "overview" | "weeklySchedule" | "progression">;
+
+type TrainingPlanPayload = Omit<TrainingPlan, keyof TrainingPlanDetails> &
+  Partial<TrainingPlanDetails> & {
+    planJson?: Partial<TrainingPlanDetails>;
+  };
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -51,16 +58,26 @@ export const formatGoalPreview = (goal: string) => {
   return goal.slice(0, firstEndOfSentence + 1);
 };
 
-export function mapTrainingPlan(planData: TrainingPlan): TrainingPlan {
+export function mapTrainingPlan(planData: TrainingPlanPayload): TrainingPlan {
+  const planDetails = planData.planJson ?? planData;
+
+  if (!hasTrainingPlanDetails(planDetails)) {
+    throw new Error("Training plan payload is missing plan details");
+  }
+
   return {
     id: planData.id,
     userId: planData.userId,
-    overview: planData.overview,
-    weeklySchedule: planData.weeklySchedule,
-    progression: planData.progression,
+    overview: planDetails.overview,
+    weeklySchedule: planDetails.weeklySchedule,
+    progression: planDetails.progression,
     version: planData.version,
     createdAt: planData.createdAt,
   };
+}
+
+function hasTrainingPlanDetails(value: Partial<TrainingPlanDetails>): value is TrainingPlanDetails {
+  return Boolean(value.overview && value.weeklySchedule && value.progression);
 }
 
 export function mapUserProfile(profileData: UserProfile): UserProfile {

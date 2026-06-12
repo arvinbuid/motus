@@ -16,6 +16,7 @@ export function serializeTrainingPlan(plan: {
     userId: plan.user_id,
     overview: planJson.overview,
     weeklySchedule: planJson.weeklySchedule,
+    progression: planJson.progression,
     planText: plan.plan_text,
     version: plan.version,
     createdAt: plan.created_at,

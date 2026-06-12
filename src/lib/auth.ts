@@ -4,7 +4,7 @@ const neonAuthUrl = import.meta.env.VITE_NEON_AUTH_URL;
 const neonAuth = createInternalNeonAuth(neonAuthUrl ?? "");
 
 export async function getAuthToken() {
-  if (!neonAuthUrl) {
+  if (!neonAuthUrl || import.meta.env.MODE === "test") {
     return null;
   }
 
